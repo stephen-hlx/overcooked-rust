@@ -1,6 +1,8 @@
-[package]
-name = "overcooked-rust"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = ["sample"]
 
-[dependencies]
+[workspace.dependencies]
+async-trait = "0.1.89"
+test-case = "3.3.1"
+thiserror = "2.0.16"
+tokio = { version = "1.47.1", features = ["full"] }
