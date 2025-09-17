@@ -112,13 +112,18 @@ mod tests {
         assert_eq!(jug.inner.read().await.occupancy, 10);
     }
 
-    #[test_case(jug3(0), jug5(0), jug3(0), jug5(0))]
-    #[test_case(jug3(0), jug5(1), jug3(0), jug5(1))]
-    #[test_case(jug3(0), jug5(5), jug3(0), jug5(5))]
-    #[test_case(jug3(1), jug5(1), jug3(0), jug5(2))]
-    #[test_case(jug3(1), jug5(4), jug3(0), jug5(5))]
-    #[test_case(jug3(2), jug5(4), jug3(1), jug5(5))]
-    #[test_case(jug3(1), jug5(5), jug3(1), jug5(5))]
+    //         |<----- input ------>| |<----- output ----->|
+    //          jug3       jug5        jug3       jug5
+    //          initial    initial     expected   expected
+    //          occupancy  occupancy   occupancy  occupancy
+    #[rustfmt::skip]
+    #[test_case(jug3(0),   jug5(0),   jug3(0),    jug5(0))]
+    #[test_case(jug3(0),   jug5(1),   jug3(0),    jug5(1))]
+    #[test_case(jug3(0),   jug5(5),   jug3(0),    jug5(5))]
+    #[test_case(jug3(1),   jug5(1),   jug3(0),    jug5(2))]
+    #[test_case(jug3(1),   jug5(4),   jug3(0),    jug5(5))]
+    #[test_case(jug3(2),   jug5(4),   jug3(1),    jug5(5))]
+    #[test_case(jug3(1),   jug5(5),   jug3(1),    jug5(5))]
     #[tokio::test]
     async fn add_to_works(
         from: InMemJug,
