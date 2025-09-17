@@ -5,8 +5,10 @@ edition = "2024"
 
 [dependencies]
 async-trait = { workspace = true }
+mockall = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 
 [dev-dependencies]
+lazy_static = { workspace = true }
 test-case = { workspace = true }

@@ -3,6 +3,8 @@ members = ["sample"]
 
 [workspace.dependencies]
 async-trait = "0.1.89"
+lazy_static = "1.5.0"
+mockall = "0.13.1"
 test-case = "3.3.1"
 thiserror = "2.0.16"
 tokio = { version = "1.47.1", features = ["full"] }
