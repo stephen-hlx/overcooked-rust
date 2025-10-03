@@ -1,5 +1,5 @@
 [workspace]
-members = ["sample"]
+members = [ "core","sample"]
 
 [workspace.dependencies]
 async-trait = "0.1.89"
