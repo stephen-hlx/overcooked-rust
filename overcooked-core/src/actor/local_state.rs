@@ -46,12 +46,12 @@ mod tests {
     use std::{cmp::Ordering, collections::BTreeSet};
 
     use crate::actor::{actor_state::ActorState, local_state::LocalState};
-    use crate::test_utils::test_actor_states::{MyActorState, MyActorState2};
+    use crate::test_utils::test_actor_states::{TestActor1State, MyActorState2};
 
     #[test]
     fn local_state_can_be_hashed() {
         let state = LocalState {
-            actor_state: Box::new(MyActorState { value: 1 }),
+            actor_state: Box::new(TestActor1State { value: 1 }),
         };
 
         let _hash_value = state.hash(&mut DefaultHasher::new());
@@ -60,10 +60,10 @@ mod tests {
     #[test]
     fn local_state_can_be_compared_by_its_partial_order() {
         let state_1 = LocalState {
-            actor_state: Box::new(MyActorState { value: 1 }),
+            actor_state: Box::new(TestActor1State { value: 1 }),
         };
         let state_2 = LocalState {
-            actor_state: Box::new(MyActorState { value: 2 }),
+            actor_state: Box::new(TestActor1State { value: 2 }),
         };
 
         assert_eq!(state_1.partial_cmp(&state_1), Some(Ordering::Equal));
@@ -80,10 +80,10 @@ mod tests {
     #[test]
     fn local_state_can_be_compared_by_its_order() {
         let state_1 = LocalState {
-            actor_state: Box::new(MyActorState { value: 1 }),
+            actor_state: Box::new(TestActor1State { value: 1 }),
         };
         let state_2 = LocalState {
-            actor_state: Box::new(MyActorState { value: 2 }),
+            actor_state: Box::new(TestActor1State { value: 2 }),
         };
 
         assert_eq!(state_1.cmp(&state_1), Ordering::Equal);
@@ -94,20 +94,20 @@ mod tests {
     #[test]
     fn local_state_can_be_compared_by_its_equivalence() {
         let state = LocalState {
-            actor_state: Box::new(MyActorState { value: 1 }),
+            actor_state: Box::new(TestActor1State { value: 1 }),
         };
 
         assert_eq!(
             state,
             LocalState {
-                actor_state: Box::new(MyActorState { value: 1 }),
+                actor_state: Box::new(TestActor1State { value: 1 }),
             }
         );
 
         assert_ne!(
             state,
             LocalState {
-                actor_state: Box::new(MyActorState { value: 2 }),
+                actor_state: Box::new(TestActor1State { value: 2 }),
             }
         );
     }
@@ -115,28 +115,28 @@ mod tests {
     #[test]
     fn local_state_can_be_cloned() {
         let mut state = LocalState {
-            actor_state: Box::new(MyActorState { value: 1 }),
+            actor_state: Box::new(TestActor1State { value: 1 }),
         };
 
         let cloned_state = state.clone();
 
         unsafe {
             let raw_ptr: *mut dyn ActorState = mem::transmute(&mut *state.actor_state);
-            let concrete_ptr = raw_ptr as *mut MyActorState;
-            let concrete_ref: &mut MyActorState = &mut *concrete_ptr;
+            let concrete_ptr = raw_ptr as *mut TestActor1State;
+            let concrete_ref: &mut TestActor1State = &mut *concrete_ptr;
             concrete_ref.value = 2;
         }
 
         assert_eq!(
             state,
             LocalState {
-                actor_state: Box::new(MyActorState { value: 2 }),
+                actor_state: Box::new(TestActor1State { value: 2 }),
             }
         );
         assert_eq!(
             cloned_state,
             LocalState {
-                actor_state: Box::new(MyActorState { value: 1 }),
+                actor_state: Box::new(TestActor1State { value: 1 }),
             }
         );
     }
@@ -145,7 +145,7 @@ mod tests {
     fn local_state_can_be_added_to_btree_set() {
         let mut set = BTreeSet::new();
         set.insert(LocalState {
-            actor_state: Box::new(MyActorState { value: 1 }),
+            actor_state: Box::new(TestActor1State { value: 1 }),
         });
     }
 }

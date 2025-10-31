@@ -26,7 +26,7 @@ mod tests {
     use crate::{
         actor::{self, local_state::LocalState},
         global_state::GlobalState,
-        test_utils::test_actor_states::MyActorState,
+        test_utils::test_actor_states::TestActor1State,
     };
 
     #[test]
@@ -34,7 +34,7 @@ mod tests {
         let _ = GlobalState::new(&BTreeMap::from([(
             actor::Id("some id".to_string()),
             LocalState {
-                actor_state: Box::new(MyActorState { value: 1 }),
+                actor_state: Box::new(TestActor1State { value: 1 }),
             },
         )]));
     }
