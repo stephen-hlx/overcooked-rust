@@ -79,6 +79,8 @@ version = "0.1.0"
 dependencies = [
  "dyn-clone",
  "dyn-hash",
+ "thiserror",
+ "tokio",
 ]
 
 [[package]]
