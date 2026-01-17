@@ -74,14 +74,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2fd1289c04a9ea8cb22300a459a72a385d7c73d3259e2ed7dcb2af674838cfa9"
 
 [[package]]
-name = "core"
-version = "0.1.0"
-dependencies = [
- "dyn-clone",
- "dyn-hash",
-]
-
-[[package]]
 name = "downcast"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -206,6 +198,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "overcooked-core"
+version = "0.1.0"
+dependencies = [
+ "dyn-clone",
+ "dyn-hash",
+]
+
+[[package]]
+name = "overcooked-sample"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "lazy_static",
+ "mockall",
+ "overcooked-core",
+ "test-case",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -292,18 +305,6 @@ name = "rustc-demangle"
 version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56f7d92ca342cea22a06f2121d944b4fd82af56988c270852495420f961d4ace"
-
-[[package]]
-name = "sample"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "lazy_static",
- "mockall",
- "test-case",
- "thiserror",
- "tokio",
-]
 
 [[package]]
 name = "scopeguard"
