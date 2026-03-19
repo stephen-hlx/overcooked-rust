@@ -1,5 +1,6 @@
 mod action;
 pub mod actor;
+mod config;
 mod derives;
 mod execution_context;
 mod global_state;

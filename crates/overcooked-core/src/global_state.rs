@@ -4,14 +4,16 @@ use crate::actor::{self, local_state::LocalState};
 
 const SEED: AtomicU64 = AtomicU64::new(0);
 
+pub type LocalStates = BTreeMap<actor::Id, LocalState>;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct GlobalState {
     id: u64,
-    local_states: BTreeMap<actor::Id, LocalState>,
+    local_states: LocalStates,
 }
 
 impl GlobalState {
-    pub fn new(local_states: &BTreeMap<actor::Id, LocalState>) -> Self {
+    pub fn new(local_states: &LocalStates) -> Self {
         Self {
             id: SEED.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
             local_states: local_states.clone(),

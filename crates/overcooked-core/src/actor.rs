@@ -1,5 +1,3 @@
-use dyn_clone::DynClone;
-
 mod actor_factory;
 pub mod actor_state;
 mod actor_state_extractor;
@@ -10,4 +8,4 @@ pub mod local_state;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Id(pub String);
 
-pub trait ActorBase: DynClone {}
+pub trait ActorBase {}
