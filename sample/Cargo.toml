@@ -1,15 +1,15 @@
 [package]
-name = "overcooked-sample"
+name = "sample"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+overcooked-core = { path = "../crates/overcooked-core" }
+
 async-trait = { workspace = true }
 mockall = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
-
-overcooked-core = { path = "../overcooked-core" }
 
 [dev-dependencies]
 lazy_static = { workspace = true }

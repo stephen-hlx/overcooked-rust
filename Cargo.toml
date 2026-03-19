@@ -1,5 +1,9 @@
 [workspace]
-members = [ "overcooked-core","overcooked-sample"]
+resolver = "2"
+members = [
+    "crates/overcooked-core",
+    "sample"
+]
 
 [workspace.dependencies]
 async-trait = "0.1.89"
