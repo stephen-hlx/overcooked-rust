@@ -1,19 +1,19 @@
-use std::{any::Any, error::Error, pin::Pin, sync::Arc};
+use std::{error::Error, pin::Pin, sync::Arc};
 
-use crate::actor;
+use crate::actor::{self, ActorBase};
 
 mod action_executor;
 
 pub type IntransitiveAction = Box<
     dyn Fn(
-        Arc<dyn Any + Send + Sync>,
+        Arc<dyn ActorBase + Send + Sync>,
     ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>,
 >;
 
 pub type TransitiveAction = Box<
     dyn Fn(
-        Arc<dyn Any + Send + Sync>,
-        Arc<dyn Any + Send + Sync>,
+        Arc<dyn ActorBase + Send + Sync>,
+        Arc<dyn ActorBase + Send + Sync>,
     ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>,
 >;
 
@@ -26,12 +26,12 @@ pub struct ActionDefinition {
 
 pub enum Action {
     Intransitive {
-        performer: Arc<dyn Any + Send + Sync>,
+        performer: Arc<dyn ActorBase + Send + Sync>,
         action: IntransitiveAction,
     },
     Transitive {
-        performer: Arc<dyn Any + Send + Sync>,
-        receiver: Arc<dyn Any + Send + Sync>,
+        performer: Arc<dyn ActorBase + Send + Sync>,
+        receiver: Arc<dyn ActorBase + Send + Sync>,
         action: TransitiveAction,
     },
 }

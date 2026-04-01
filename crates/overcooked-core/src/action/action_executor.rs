@@ -27,10 +27,11 @@ pub(super) struct ActionResult(Option<Box<dyn Error>>);
 
 #[cfg(test)]
 mod tests {
-    use std::{any::Any, error::Error, sync::Arc};
+    use std::{error::Error, sync::Arc};
 
     use crate::{
         action::{Action, action_executor::ActionExecutor},
+        actor::ActorBase,
         test_utils::test_actor_states::{TestActor1, TestActor2},
     };
 
@@ -49,9 +50,10 @@ mod tests {
     }
 
     async fn proxy_for_intransitive_action(
-        test_actor_1: Arc<dyn Any + Send + Sync>,
+        test_actor_1: Arc<dyn ActorBase + Send + Sync>,
     ) -> Result<(), Box<dyn Error>> {
         Ok(test_actor_1
+            .as_any()
             .downcast_ref::<TestActor1>()
             .unwrap()
             .increase_inner_value_by_one()
@@ -82,13 +84,16 @@ mod tests {
     }
 
     async fn proxy_for_transitive_action(
-        test_actor_1: Arc<dyn Any + Send + Sync>,
-        test_actor_2: Arc<dyn Any + Send + Sync>,
+        test_actor_1: Arc<dyn ActorBase + Send + Sync>,
+        test_actor_2: Arc<dyn ActorBase + Send + Sync>,
     ) -> Result<(), Box<dyn Error>> {
         Ok(test_actor_1
+            .as_any()
             .downcast_ref::<TestActor1>()
             .unwrap()
-            .decrease_test_actor_2_value_by_one(test_actor_2.downcast_ref::<TestActor2>().unwrap())
+            .decrease_test_actor_2_value_by_one(
+                test_actor_2.as_any().downcast_ref::<TestActor2>().unwrap(),
+            )
             .await
             .map_err(|e| Box::new(e))?)
     }

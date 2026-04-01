@@ -1,3 +1,5 @@
+use std::{any::Any, sync::Arc};
+
 mod actor_factory;
 pub mod actor_state;
 mod actor_state_extractor;
@@ -8,4 +10,18 @@ pub mod local_state;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Id(pub String);
 
-pub trait ActorBase {}
+pub trait AsAny: Any {
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_arc(self: Arc<Self>) -> Arc<dyn Any>;
+}
+
+impl<T: Any> AsAny for T {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn as_any_arc(self: Arc<Self>) -> Arc<dyn Any> {
+        self
+    }
+}
+
+pub trait ActorBase: AsAny {}
