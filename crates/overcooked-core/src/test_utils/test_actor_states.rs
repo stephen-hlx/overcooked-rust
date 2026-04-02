@@ -5,6 +5,7 @@ use crate::{
     impl_actor_base, impl_actor_state,
 };
 
+#[derive(Debug)]
 pub struct UpdatableValue {
     value: Arc<RwLock<u8>>,
 }
@@ -45,10 +46,12 @@ pub struct TestActor2State {
     pub value: u8,
 }
 
+#[derive(Debug)]
 pub struct TestActor1 {
     pub value: UpdatableValue,
 }
 
+#[derive(Debug)]
 pub struct TestActor2 {
     pub value: UpdatableValue,
 }
