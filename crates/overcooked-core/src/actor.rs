@@ -19,7 +19,6 @@ pub trait ActorBase: Any {
 macro_rules! impl_actor_base {
     ($t:ty) => {
         impl ActorBase for $t {
-            // self here is ALWAYS &$t — no ambiguity possible
             fn as_any(&self) -> &dyn ::std::any::Any {
                 self
             }

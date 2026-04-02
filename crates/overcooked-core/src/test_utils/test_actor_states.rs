@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock};
 
 use crate::{
     actor::{ActorBase, actor_state::ActorState},
-    impl_actor_base,
+    impl_actor_base, impl_actor_state,
 };
 
 pub struct UpdatableValue {
@@ -40,14 +40,10 @@ pub struct TestActor1State {
     pub value: u8,
 }
 
-impl ActorState for TestActor1State {}
-
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
-pub struct TestActorState2 {
+pub struct TestActor2State {
     pub value: u8,
 }
-
-impl ActorState for TestActorState2 {}
 
 pub struct TestActor1 {
     pub value: UpdatableValue,
@@ -59,6 +55,9 @@ pub struct TestActor2 {
 
 impl_actor_base!(TestActor1);
 impl_actor_base!(TestActor2);
+
+impl_actor_state!(TestActor1State);
+impl_actor_state!(TestActor2State);
 
 impl TestActor1 {
     pub fn new(value: u8) -> Self {

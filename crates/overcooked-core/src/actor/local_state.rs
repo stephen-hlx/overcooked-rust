@@ -46,7 +46,7 @@ mod tests {
     use std::{cmp::Ordering, collections::BTreeSet};
 
     use crate::actor::{actor_state::ActorState, local_state::LocalState};
-    use crate::test_utils::test_actor_states::{TestActor1State, TestActorState2};
+    use crate::test_utils::test_actor_states::{TestActor1State, TestActor2State};
 
     #[test]
     fn local_state_can_be_hashed() {
@@ -71,7 +71,7 @@ mod tests {
         assert_eq!(state_2.partial_cmp(&state_1), Some(Ordering::Greater));
         assert_eq!(
             state_1.partial_cmp(&LocalState {
-                actor_state: Box::new(TestActorState2 { value: 1 })
+                actor_state: Box::new(TestActor2State { value: 1 })
             }),
             None
         );

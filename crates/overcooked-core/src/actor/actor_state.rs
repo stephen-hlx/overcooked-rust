@@ -1,3 +1,5 @@
+use std::{any::Any, sync::Arc};
+
 use dyn_clone::DynClone;
 
 use crate::derives::{
@@ -5,10 +7,23 @@ use crate::derives::{
     dyn_partial_ord::DynPartialOrd,
 };
 
-/// The state of an actor in a system that consists of multiple actors.
 pub trait ActorState:
-    DynPartialEq + DynPartialOrd + DynOrd + DynHash + DynClone + std::fmt::Debug
+    Any + DynPartialEq + DynPartialOrd + DynOrd + DynHash + DynClone + std::fmt::Debug
 {
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_arc(self: Arc<Self>) -> Arc<dyn Any>;
 }
 
-// dyn_hash::hash_trait_object!(ActorState);
+#[macro_export]
+macro_rules! impl_actor_state {
+    ($t:ty) => {
+        impl ActorState for $t {
+            fn as_any(&self) -> &dyn ::std::any::Any {
+                self
+            }
+            fn as_any_arc(self: Arc<Self>) -> Arc<dyn ::std::any::Any> {
+                self
+            }
+        }
+    };
+}
