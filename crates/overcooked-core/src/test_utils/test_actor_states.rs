@@ -1,6 +1,9 @@
 use std::sync::{Arc, RwLock};
 
-use crate::actor::{ActorBase, actor_state::ActorState};
+use crate::{
+    actor::{ActorBase, actor_state::ActorState},
+    impl_actor_base,
+};
 
 pub struct UpdatableValue {
     value: Arc<RwLock<u8>>,
@@ -54,8 +57,8 @@ pub struct TestActor2 {
     pub value: UpdatableValue,
 }
 
-impl ActorBase for TestActor1 {}
-impl ActorBase for TestActor2 {}
+impl_actor_base!(TestActor1);
+impl_actor_base!(TestActor2);
 
 impl TestActor1 {
     pub fn new(value: u8) -> Self {

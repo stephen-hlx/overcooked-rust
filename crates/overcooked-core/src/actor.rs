@@ -10,18 +10,22 @@ pub mod local_state;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Id(pub String);
 
-pub trait AsAny: Any {
+pub trait ActorBase: Any {
     fn as_any(&self) -> &dyn Any;
     fn as_any_arc(self: Arc<Self>) -> Arc<dyn Any>;
 }
 
-impl<T: Any> AsAny for T {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_arc(self: Arc<Self>) -> Arc<dyn Any> {
-        self
-    }
+#[macro_export]
+macro_rules! impl_actor_base {
+    ($t:ty) => {
+        impl ActorBase for $t {
+            // self here is ALWAYS &$t — no ambiguity possible
+            fn as_any(&self) -> &dyn ::std::any::Any {
+                self
+            }
+            fn as_any_arc(self: Arc<Self>) -> Arc<dyn ::std::any::Any> {
+                self
+            }
+        }
+    };
 }
-
-pub trait ActorBase: AsAny {}
