@@ -46,7 +46,7 @@ mod tests {
     use std::{cmp::Ordering, collections::BTreeSet};
 
     use crate::actor::{actor_state::ActorState, local_state::LocalState};
-    use crate::test_utils::test_actor_states::{TestActor1State, TestActor2State};
+    use crate::test_utils::test_actors::{TestActor1State, TestActor2State};
 
     #[test]
     fn local_state_can_be_hashed() {

@@ -32,7 +32,7 @@ mod tests {
     use crate::{
         action::{Action, action_executor::ActionExecutor},
         actor::ActorBase,
-        test_utils::test_actor_states::{TestActor1, TestActor2},
+        test_utils::test_actors::{TestActor1, TestActor2},
     };
 
     #[tokio::test]

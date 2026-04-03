@@ -28,7 +28,7 @@ mod tests {
     use crate::{
         actor::{self, local_state::LocalState},
         global_state::GlobalState,
-        test_utils::test_actor_states::TestActor1State,
+        test_utils::test_actors::TestActor1State,
     };
 
     #[test]

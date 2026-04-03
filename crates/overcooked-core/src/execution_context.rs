@@ -14,7 +14,7 @@ mod tests {
         actor::{self, local_state::LocalState},
         execution_context::ExecutionContext,
         global_state::GlobalState,
-        test_utils::test_actor_states::TestActor1State,
+        test_utils::test_actors::TestActor1State,
     };
 
     #[test]

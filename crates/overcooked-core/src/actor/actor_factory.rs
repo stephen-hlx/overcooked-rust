@@ -12,7 +12,7 @@ mod tests {
 
     use crate::{
         actor::{ActorBase, actor_factory::ActorFactory, actor_state::ActorState},
-        test_utils::test_actor_states::{TestActor1, TestActor1State},
+        test_utils::test_actors::{TestActor1, TestActor1State},
     };
 
     struct TestActor1Factory;
