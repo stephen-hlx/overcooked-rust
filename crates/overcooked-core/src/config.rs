@@ -1,5 +1,5 @@
 use std::collections::HashMap;
 
-use crate::{action::LabelledAction, actor};
+use crate::{action::ActionTemplate, actor};
 
-pub type ActorActionMap = HashMap<actor::Id, LabelledAction>;
+pub type ActorActionMap = HashMap<actor::Id, ActionTemplate>;

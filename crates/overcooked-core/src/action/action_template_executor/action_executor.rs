@@ -1,6 +1,4 @@
-use std::error::Error;
-
-use crate::action::{Action, ActionExecutor, ActionResult};
+use super::{Action, ActionExecutor, ActionResult};
 
 pub(super) struct SimpleActionExecutor;
 
@@ -29,21 +27,22 @@ mod tests {
     use std::{error::Error, sync::Arc};
 
     use crate::{
-        action::{Action, ActionExecutor, action_executor::SimpleActionExecutor},
         actor::ActorBase,
         test_utils::test_actors::{TestActor1, TestActor2},
     };
+
+    use super::*;
 
     #[tokio::test]
     async fn can_execute_intrasnsitive_action() {
         let executor = SimpleActionExecutor;
         let test_actor_1 = Arc::new(TestActor1::new(0));
-        let intransitivie_action: Action = Action::Intransitive {
+        let action = Action::Intransitive {
             performer: test_actor_1.clone(),
             action: Box::new(|actor| Box::pin(proxy_for_intransitive_action(actor))),
         };
 
-        assert!(executor.execute(intransitivie_action).await.0.is_none());
+        assert!(executor.execute(action).await.0.is_none());
 
         assert_eq!(test_actor_1.get_value(), 1);
     }
@@ -64,7 +63,7 @@ mod tests {
         let executor = SimpleActionExecutor;
         let test_actor_1 = Arc::new(TestActor1::new(0));
         let test_actor_2 = Arc::new(TestActor2::new(5));
-        let transitivie_action: Action = Action::Transitive {
+        let action = Action::Transitive {
             performer: test_actor_1.clone(),
             receiver: test_actor_2.clone(),
             action: Box::new(|action_performer, action_receiver| {
@@ -75,7 +74,7 @@ mod tests {
             }),
         };
 
-        assert!(executor.execute(transitivie_action).await.0.is_none());
+        assert!(executor.execute(action).await.0.is_none());
 
         assert_eq!(test_actor_1.get_value(), 0);
         assert_eq!(test_actor_2.get_value(), 4);
