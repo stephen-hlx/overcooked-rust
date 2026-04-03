@@ -133,6 +133,7 @@ dependencies = [
 name = "overcooked-core"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "dyn-clone",
  "dyn-hash",
  "thiserror",

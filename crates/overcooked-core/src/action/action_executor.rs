@@ -1,11 +1,12 @@
 use std::error::Error;
 
-use crate::action::Action;
+use crate::action::{Action, ActionExecutor, ActionResult};
 
-pub(super) struct ActionExecutor;
+pub(super) struct SimpleActionExecutor;
 
-impl ActionExecutor {
-    pub(super) async fn execute(&self, action: Action) -> ActionResult {
+#[async_trait::async_trait]
+impl ActionExecutor for SimpleActionExecutor {
+    async fn execute(&self, action: Action) -> ActionResult {
         if let Err(err) = match action {
             Action::Intransitive { performer, action } => action(performer),
             Action::Transitive {
@@ -23,21 +24,19 @@ impl ActionExecutor {
     }
 }
 
-pub(super) struct ActionResult(Option<Box<dyn Error>>);
-
 #[cfg(test)]
 mod tests {
     use std::{error::Error, sync::Arc};
 
     use crate::{
-        action::{Action, action_executor::ActionExecutor},
+        action::{Action, ActionExecutor, action_executor::SimpleActionExecutor},
         actor::ActorBase,
         test_utils::test_actors::{TestActor1, TestActor2},
     };
 
     #[tokio::test]
     async fn can_execute_intrasnsitive_action() {
-        let executor = ActionExecutor;
+        let executor = SimpleActionExecutor;
         let test_actor_1 = Arc::new(TestActor1::new(0));
         let intransitivie_action: Action = Action::Intransitive {
             performer: test_actor_1.clone(),
@@ -63,7 +62,7 @@ mod tests {
 
     #[tokio::test]
     async fn can_execute_transitive_action() {
-        let executor = ActionExecutor;
+        let executor = SimpleActionExecutor;
         let test_actor_1 = Arc::new(TestActor1::new(0));
         let test_actor_2 = Arc::new(TestActor2::new(5));
         let transitivie_action: Action = Action::Transitive {

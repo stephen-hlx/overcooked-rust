@@ -6,15 +6,17 @@ mod action_executor;
 
 pub type IntransitiveAction = Box<
     dyn Fn(
-        Arc<dyn ActorBase + Send + Sync>,
-    ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>,
+            Arc<dyn ActorBase + Send + Sync>,
+        ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>
+        + Send,
 >;
 
 pub type TransitiveAction = Box<
     dyn Fn(
-        Arc<dyn ActorBase + Send + Sync>,
-        Arc<dyn ActorBase + Send + Sync>,
-    ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>,
+            Arc<dyn ActorBase + Send + Sync>,
+            Arc<dyn ActorBase + Send + Sync>,
+        ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>
+        + Send,
 >;
 
 /// We may need to replace T1 with Box<T1> just to make sure
@@ -49,3 +51,9 @@ pub struct ActionTemplate {
     pub label: &'static str,
     pub action_type: ActionType,
 }
+
+#[async_trait::async_trait]
+trait ActionExecutor {
+    async fn execute(&self, action: Action) -> ActionResult;
+}
+pub(super) struct ActionResult(Option<Box<dyn Error>>);
