@@ -1,8 +1,12 @@
 use std::{error::Error, pin::Pin, sync::Arc};
 
-use crate::actor::{self, ActorBase};
+use crate::{
+    actor::{self, ActorBase},
+    global_state::{GlobalState, LocalStates},
+};
 
 mod action_executor;
+mod action_template_executor;
 
 pub type IntransitiveAction = Box<
     dyn Fn(
@@ -53,7 +57,18 @@ pub struct ActionTemplate {
 }
 
 #[async_trait::async_trait]
-trait ActionExecutor {
+trait ActionExecutor: Send + Sync {
     async fn execute(&self, action: Action) -> ActionResult;
 }
 pub(super) struct ActionResult(Option<Box<dyn Error>>);
+
+#[async_trait::async_trait]
+trait ActionTemplateExecutor {
+    async fn execute(&self, template: ActionTemplate, global_state: GlobalState)
+    -> ExecutionResult;
+}
+
+pub struct ExecutionResult {
+    pub action_result: ActionResult,
+    pub local_states: LocalStates,
+}

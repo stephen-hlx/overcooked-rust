@@ -8,7 +8,7 @@ use crate::derives::{
 };
 
 pub trait ActorState:
-    Any + DynPartialEq + DynPartialOrd + DynOrd + DynHash + DynClone + std::fmt::Debug
+    Any + DynPartialEq + DynPartialOrd + DynOrd + DynHash + DynClone + std::fmt::Debug + Send
 {
     fn as_any(&self) -> &dyn Any;
     fn as_any_arc(self: Arc<Self>) -> Arc<dyn Any>;

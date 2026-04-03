@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::actor::{ActorBase, actor_state::ActorState};
 
-pub trait ActorFactory {
+pub trait ActorFactory: Send + Sync {
     fn restore_from_state(&self, actor_state: Arc<dyn ActorState>) -> Arc<dyn ActorBase>;
 }
 

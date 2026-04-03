@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::actor::{ActorBase, actor_state::ActorState};
 
-pub trait ActorStateExtractor {
+pub trait ActorStateExtractor: Send + Sync {
     fn extract(&self, actor: Arc<dyn ActorBase>) -> Arc<dyn ActorState>;
 }
 
