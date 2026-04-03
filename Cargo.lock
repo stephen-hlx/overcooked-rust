@@ -136,6 +136,7 @@ dependencies = [
  "async-trait",
  "dyn-clone",
  "dyn-hash",
+ "test-case",
  "thiserror",
  "tokio",
 ]
