@@ -16,12 +16,12 @@ pub struct TestActor2State {
     pub value: u8,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TestActor1 {
     pub value: DataStore,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TestActor2 {
     pub value: DataStore,
 }

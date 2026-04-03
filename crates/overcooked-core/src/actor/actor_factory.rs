@@ -34,9 +34,7 @@ mod tests {
         let factory = TestActor1Factory;
 
         assert_eq!(
-            factory
-                .restore_from_state(Arc::new(state))
-                .as_any()
+            ActorBase::as_any(factory.restore_from_state(Arc::new(state)).as_ref())
                 .downcast_ref::<TestActor1>()
                 .unwrap()
                 .get_value(),

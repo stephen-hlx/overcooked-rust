@@ -1,5 +1,7 @@
 use std::{any::Any, sync::Arc};
 
+use crate::derives::dyn_partial_eq::DynPartialEq;
+
 mod actor_factory;
 pub mod actor_state;
 mod actor_state_extractor;
@@ -10,7 +12,7 @@ pub mod local_state;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Id(pub String);
 
-pub trait ActorBase: Any + std::fmt::Debug {
+pub trait ActorBase: Any + std::fmt::Debug + DynPartialEq {
     fn as_any(&self) -> &dyn Any;
     fn as_any_arc(self: Arc<Self>) -> Arc<dyn Any>;
 }

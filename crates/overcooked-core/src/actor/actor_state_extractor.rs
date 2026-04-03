@@ -20,8 +20,7 @@ mod tests {
     impl ActorStateExtractor for TestActor1StateExtractor {
         fn extract(&self, actor: Arc<dyn ActorBase>) -> Arc<dyn ActorState> {
             Arc::new(TestActor1State {
-                value: actor
-                    .as_any()
+                value: ActorBase::as_any(actor.as_ref())
                     .downcast_ref::<TestActor1>()
                     .unwrap()
                     .value

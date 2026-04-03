@@ -8,6 +8,12 @@ pub struct DataStore {
     value: Arc<RwLock<u8>>,
 }
 
+impl PartialEq for DataStore {
+    fn eq(&self, other: &Self) -> bool {
+        *self.value.read().unwrap() == *other.value.read().unwrap()
+    }
+}
+
 impl DataStore {
     pub fn new(value: u8) -> Self {
         Self {
@@ -46,5 +52,11 @@ mod tests {
         assert_eq!(updatable_value.get_value(), 6);
         updatable_value.decrease(1).await.unwrap();
         assert_eq!(updatable_value.get_value(), 5);
+    }
+
+    #[test]
+    fn comparable() {
+        assert_eq!(DataStore::new(11), DataStore::new(11));
+        assert_ne!(DataStore::new(11), DataStore::new(12));
     }
 }

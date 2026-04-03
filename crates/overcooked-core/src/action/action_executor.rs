@@ -51,8 +51,7 @@ mod tests {
     async fn proxy_for_intransitive_action(
         test_actor_1: Arc<dyn ActorBase + Send + Sync>,
     ) -> Result<(), Box<dyn Error>> {
-        Ok(test_actor_1
-            .as_any()
+        Ok(ActorBase::as_any(test_actor_1.as_ref())
             .downcast_ref::<TestActor1>()
             .unwrap()
             .increase_inner_value_by_one()
@@ -86,12 +85,13 @@ mod tests {
         test_actor_1: Arc<dyn ActorBase + Send + Sync>,
         test_actor_2: Arc<dyn ActorBase + Send + Sync>,
     ) -> Result<(), Box<dyn Error>> {
-        Ok(test_actor_1
-            .as_any()
+        Ok(ActorBase::as_any(test_actor_1.as_ref())
             .downcast_ref::<TestActor1>()
             .unwrap()
             .decrease_test_actor_2_value_by_one(
-                test_actor_2.as_any().downcast_ref::<TestActor2>().unwrap(),
+                ActorBase::as_any(test_actor_2.as_ref())
+                    .downcast_ref::<TestActor2>()
+                    .unwrap(),
             )
             .await
             .map_err(|e| Box::new(e))?)
