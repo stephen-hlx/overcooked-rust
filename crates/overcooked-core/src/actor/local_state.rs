@@ -36,11 +36,10 @@ impl std::hash::Hash for LocalState {
 #[cfg(test)]
 mod tests {
     use std::hash::{DefaultHasher, Hash};
-    use std::mem;
     use std::sync::Arc;
     use std::{cmp::Ordering, collections::BTreeSet};
 
-    use crate::actor::{actor_state::ActorState, local_state::LocalState};
+    use crate::actor::local_state::LocalState;
     use crate::test_utils::test_actors::{TestActor1State, TestActor2State};
 
     #[test]

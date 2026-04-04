@@ -2,9 +2,9 @@ use std::{any::Any, sync::Arc};
 
 use crate::derives::dyn_partial_eq::DynPartialEq;
 
-mod actor_factory;
+pub mod actor_factory;
 pub mod actor_state;
-mod actor_state_extractor;
+pub mod actor_state_extractor;
 pub mod actor_state_transformer_config;
 pub mod local_state;
 

@@ -49,13 +49,16 @@ mod tests {
 
     async fn proxy_for_intransitive_action(
         test_actor_1: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error + Send>> {
         Ok(ActorBase::as_any(test_actor_1.as_ref())
             .downcast_ref::<TestActor1>()
             .unwrap()
             .increase_inner_value_by_one()
             .await
-            .map_err(|e| Box::new(e))?)
+            .map_err(|e| {
+                let err: Box<dyn Error + Send> = Box::new(e);
+                err
+            })?)
     }
 
     #[tokio::test]
@@ -83,7 +86,7 @@ mod tests {
     async fn proxy_for_transitive_action(
         test_actor_1: Arc<dyn ActorBase>,
         test_actor_2: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error + Send>> {
         Ok(ActorBase::as_any(test_actor_1.as_ref())
             .downcast_ref::<TestActor1>()
             .unwrap()
@@ -93,6 +96,9 @@ mod tests {
                     .unwrap(),
             )
             .await
-            .map_err(|e| Box::new(e))?)
+            .map_err(|e| {
+                let err: Box<dyn Error + Send> = Box::new(e);
+                err
+            })?)
     }
 }

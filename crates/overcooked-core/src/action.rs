@@ -2,7 +2,7 @@ use std::{error::Error, pin::Pin, sync::Arc};
 
 use crate::{
     actor::{self, ActorBase},
-    global_state::{GlobalState, LocalStates},
+    global_state::LocalStates,
 };
 
 mod action_template_executor;
@@ -10,7 +10,8 @@ mod action_template_executor;
 pub type IntransitiveAction = Box<
     dyn Fn(
             Arc<dyn ActorBase>,
-        ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>
+        )
+            -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error + Send>>> + Send + 'static>>
         + Send,
 >;
 
@@ -18,7 +19,8 @@ pub type TransitiveAction = Box<
     dyn Fn(
             Arc<dyn ActorBase>,
             Arc<dyn ActorBase>,
-        ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>
+        )
+            -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error + Send>>> + Send + 'static>>
         + Send,
 >;
 
@@ -26,26 +28,23 @@ pub enum ActionType {
     Intransitive(IntransitiveAction),
     Transitive {
         receiver_id: actor::Id,
-        transitive_action: TransitiveAction,
+        action: TransitiveAction,
     },
 }
 
 pub struct ActionTemplate {
-    pub actor_performer_id: actor::Id,
+    pub performer_id: actor::Id,
     pub label: &'static str,
     pub action_type: ActionType,
 }
 
 #[async_trait::async_trait]
 trait ActionTemplateExecutor {
-    async fn materialise(
-        &self,
-        template: ActionTemplate,
-        global_state: GlobalState,
-    ) -> ExecutionResult;
+    async fn execute(&self, template: ActionTemplate, local_states: LocalStates)
+    -> ExecutionResult;
 }
 
-pub struct ActionResult(pub Option<Box<dyn Error>>);
+pub struct ActionResult(pub Option<Box<dyn Error + Send>>);
 
 pub struct ExecutionResult {
     pub action_result: ActionResult,
