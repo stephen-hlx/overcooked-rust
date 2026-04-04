@@ -4,7 +4,8 @@ use crate::actor::{self, local_state::LocalState};
 
 const SEED: AtomicU64 = AtomicU64::new(0);
 
-pub type LocalStates = BTreeMap<actor::Id, LocalState>;
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct LocalStates(pub BTreeMap<actor::Id, LocalState>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct GlobalState {
@@ -23,21 +24,21 @@ impl GlobalState {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
+    use std::{collections::BTreeMap, sync::Arc};
 
     use crate::{
         actor::{self, local_state::LocalState},
-        global_state::GlobalState,
+        global_state::{GlobalState, LocalStates},
         test_utils::test_actors::TestActor1State,
     };
 
     #[test]
     fn can_be_constructed() {
-        let _ = GlobalState::new(&BTreeMap::from([(
+        let _ = GlobalState::new(&LocalStates(BTreeMap::from([(
             actor::Id("some id".to_string()),
             LocalState {
-                actor_state: Box::new(TestActor1State { value: 1 }),
+                actor_state: Arc::new(TestActor1State { value: 1 }),
             },
-        )]));
+        )])));
     }
 }
