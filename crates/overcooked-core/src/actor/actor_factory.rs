@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::actor::{ActorBase, actor_state::ActorState};
 
+#[mockall::automock]
 #[async_trait::async_trait]
 pub trait ActorFactory {
     async fn restore_from_state(&self, actor_state: Arc<dyn ActorState>) -> Arc<dyn ActorBase>;

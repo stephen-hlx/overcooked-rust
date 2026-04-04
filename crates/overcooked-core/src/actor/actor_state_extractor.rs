@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::actor::{ActorBase, actor_state::ActorState};
 
+#[mockall::automock]
 #[async_trait::async_trait]
 pub trait ActorStateExtractor {
     async fn extract(&self, actor: Arc<dyn ActorBase>) -> Arc<dyn ActorState>;
