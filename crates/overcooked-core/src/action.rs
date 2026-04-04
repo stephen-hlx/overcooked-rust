@@ -9,15 +9,15 @@ mod action_template_executor;
 
 pub type IntransitiveAction = Box<
     dyn Fn(
-            Arc<dyn ActorBase + Send + Sync>,
+            Arc<dyn ActorBase>,
         ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>
         + Send,
 >;
 
 pub type TransitiveAction = Box<
     dyn Fn(
-            Arc<dyn ActorBase + Send + Sync>,
-            Arc<dyn ActorBase + Send + Sync>,
+            Arc<dyn ActorBase>,
+            Arc<dyn ActorBase>,
         ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>
         + Send,
 >;

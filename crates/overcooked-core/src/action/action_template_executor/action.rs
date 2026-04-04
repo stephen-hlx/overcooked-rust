@@ -71,8 +71,8 @@ mod tests {
     #[test_case(false, TestActor1::new(1), TestActor2::new(1))]
     fn intransitive_action_is_comparable_by_actor(
         expected: bool,
-        actor_1: impl ActorBase + Send + Sync,
-        actor_2: impl ActorBase + Send + Sync,
+        actor_1: impl ActorBase,
+        actor_2: impl ActorBase,
     ) {
         assert_eq!(
             Action::Intransitive {
@@ -92,10 +92,10 @@ mod tests {
     #[test_case(false, TestActor1::new(1), TestActor2::new(1), TestActor1::new(2), TestActor2::new(2))]
     fn transitive_action_is_comparable_by_actor(
         expected: bool,
-        performer_1: impl ActorBase + Send + Sync,
-        receiver_1: impl ActorBase + Send + Sync,
-        performer_2: impl ActorBase + Send + Sync,
-        receiver_2: impl ActorBase + Send + Sync,
+        performer_1: impl ActorBase,
+        receiver_1: impl ActorBase,
+        performer_2: impl ActorBase,
+        receiver_2: impl ActorBase,
     ) {
         assert_eq!(
             Action::Transitive {
@@ -115,15 +115,13 @@ mod tests {
         );
     }
 
-    async fn proxy_for_intransitive_action(
-        _: Arc<dyn ActorBase + Send + Sync>,
-    ) -> Result<(), Box<dyn Error>> {
+    async fn proxy_for_intransitive_action(_: Arc<dyn ActorBase>) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
 
     async fn proxy_for_transitive_action(
-        _: Arc<dyn ActorBase + Send + Sync>,
-        _: Arc<dyn ActorBase + Send + Sync>,
+        _: Arc<dyn ActorBase>,
+        _: Arc<dyn ActorBase>,
     ) -> Result<(), Box<dyn Error>> {
         Ok(())
     }

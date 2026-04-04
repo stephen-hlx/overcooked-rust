@@ -12,7 +12,7 @@ pub mod local_state;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Id(pub String);
 
-pub trait ActorBase: Any + std::fmt::Debug + DynPartialEq {
+pub trait ActorBase: Any + Send + Sync + std::fmt::Debug + DynPartialEq {
     fn as_any(&self) -> &dyn Any;
     fn as_any_arc(self: Arc<Self>) -> Arc<dyn Any>;
 }

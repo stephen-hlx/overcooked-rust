@@ -15,12 +15,12 @@ trait ActionExecutor {
 
 enum Action {
     Intransitive {
-        performer: Arc<dyn ActorBase + Send + Sync>,
+        performer: Arc<dyn ActorBase>,
         action: IntransitiveAction,
     },
     Transitive {
-        performer: Arc<dyn ActorBase + Send + Sync>,
-        receiver: Arc<dyn ActorBase + Send + Sync>,
+        performer: Arc<dyn ActorBase>,
+        receiver: Arc<dyn ActorBase>,
         action: TransitiveAction,
     },
 }
