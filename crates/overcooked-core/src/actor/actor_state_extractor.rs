@@ -2,8 +2,9 @@ use std::sync::Arc;
 
 use crate::actor::{ActorBase, actor_state::ActorState};
 
+#[async_trait::async_trait]
 pub trait ActorStateExtractor {
-    fn extract(&self, actor: Arc<dyn ActorBase>) -> Arc<dyn ActorState>;
+    async fn extract(&self, actor: Arc<dyn ActorBase>) -> Arc<dyn ActorState>;
 }
 
 #[cfg(test)]
@@ -17,8 +18,9 @@ mod tests {
 
     struct TestActor1StateExtractor;
 
+    #[async_trait::async_trait]
     impl ActorStateExtractor for TestActor1StateExtractor {
-        fn extract(&self, actor: Arc<dyn ActorBase>) -> Arc<dyn ActorState> {
+        async fn extract(&self, actor: Arc<dyn ActorBase>) -> Arc<dyn ActorState> {
             Arc::new(TestActor1State {
                 value: ActorBase::as_any(actor.as_ref())
                     .downcast_ref::<TestActor1>()
@@ -29,12 +31,12 @@ mod tests {
         }
     }
 
-    #[test]
-    fn works() {
+    #[tokio::test]
+    async fn works() {
         let actor = TestActor1::new(10);
         let extractor = TestActor1StateExtractor;
 
-        let binding = extractor.extract(Arc::new(actor));
+        let binding = extractor.extract(Arc::new(actor)).await;
         assert_eq!(
             *ActorState::as_any(binding.as_ref())
                 .downcast_ref::<TestActor1State>()
