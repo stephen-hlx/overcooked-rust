@@ -47,15 +47,18 @@ mod tests {
         sync::{Arc, LazyLock},
     };
 
+    use mockall::predicate::eq;
+
     use crate::{
         action::action_template_executor::{MockActionExecutor, SimpleActionTemplateExecutor},
         actor::{
             self,
             actor_factory::{ActorFactory, MockActorFactory},
+            actor_state::ActorState,
             actor_state_extractor::{ActorStateExtractor, MockActorStateExtractor},
             local_state::LocalState,
         },
-        global_state::{GlobalState, LocalStates},
+        global_state::LocalStates,
         test_utils::test_actors::{TestActor1, TestActor1State},
     };
 
@@ -65,16 +68,23 @@ mod tests {
     #[tokio::test]
     async fn intransitive_action_template_execution_works() {
         let actor = Arc::new(TestActor1::new(10));
+        let actor_state: Arc<dyn ActorState> = Arc::new(TestActor1State { value: 10 });
         let local_states = LocalStates(BTreeMap::from([(
             ACTOR_1_ID.clone(),
             LocalState {
-                actor_state: Box::new(TestActor1State { value: 10 }),
+                actor_state: actor_state.clone(),
             },
         )]));
 
         let mut action_executor = MockActionExecutor::new();
         let mut actor_1_factor = MockActorFactory::new();
         let mut actor_1_state_extractor = MockActorStateExtractor::new();
+
+        actor_1_factor
+            .expect_restore_from_state()
+            .with(eq(actor_state))
+            .once()
+            .return_once(|_| Arc::new(actor));
 
         let executor = SimpleActionTemplateExecutor {
             action_executor,
