@@ -4,7 +4,7 @@ use crate::actor::{ActorBase, actor_state::ActorState};
 
 #[mockall::automock]
 #[async_trait::async_trait]
-pub trait ActorFactory {
+pub trait ActorFactory: Sync {
     async fn restore_from_state(&self, actor_state: Arc<dyn ActorState>) -> Arc<dyn ActorBase>;
 }
 

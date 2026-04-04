@@ -38,11 +38,8 @@ pub struct ActionTemplate {
 
 #[async_trait::async_trait]
 trait ActionTemplateExecutor {
-    async fn materialise(
-        &self,
-        template: ActionTemplate,
-        global_state: GlobalState,
-    ) -> ExecutionResult;
+    async fn execute(&self, template: ActionTemplate, local_states: LocalStates)
+    -> ExecutionResult;
 }
 
 pub struct ActionResult(pub Option<Box<dyn Error>>);
