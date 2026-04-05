@@ -49,7 +49,7 @@ mod tests {
 
     async fn proxy_for_intransitive_action(
         test_actor_1: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error + Send>> {
         Ok(ActorBase::as_any(test_actor_1.as_ref())
             .downcast_ref::<TestActor1>()
             .unwrap()

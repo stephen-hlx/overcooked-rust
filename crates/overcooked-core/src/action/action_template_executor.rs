@@ -1,4 +1,7 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::{BTreeMap, HashMap},
+    sync::Arc,
+};
 
 use crate::{
     action::{
@@ -7,9 +10,12 @@ use crate::{
     },
     actor::{
         self, ActorBase, actor_factory::ActorFactory, actor_state_extractor::ActorStateExtractor,
+        local_state::LocalState,
     },
     global_state::LocalStates,
 };
+
+use super::ActionType;
 
 mod action;
 mod action_executor;
@@ -51,7 +57,65 @@ where
         template: ActionTemplate,
         local_states: LocalStates,
     ) -> ExecutionResult {
-        todo!()
+        let performer = self
+            .actor_factories
+            .get(&template.actor_performer_id)
+            .unwrap()
+            .restore_from_state(
+                local_states
+                    .0
+                    .get(&template.actor_performer_id)
+                    .unwrap()
+                    .actor_state
+                    .clone(),
+            )
+            .await;
+
+        let action_result = match (match template.action_type {
+            ActionType::Intransitive(action) => action(performer.clone()),
+            ActionType::Transitive {
+                receiver_id,
+                transitive_action,
+            } => {
+                let receiver = self
+                    .actor_factories
+                    .get(&receiver_id)
+                    .unwrap()
+                    .restore_from_state(
+                        local_states
+                            .0
+                            .get(&receiver_id)
+                            .unwrap()
+                            .actor_state
+                            .clone(),
+                    )
+                    .await;
+                transitive_action(performer.clone(), receiver)
+            }
+        }
+        .await)
+        {
+            Ok(_) => ActionResult(None),
+            Err(err) => ActionResult(Some(err)),
+        };
+
+        let mut updated_local_states = local_states.clone();
+        updated_local_states.0.insert(
+            template.actor_performer_id.clone(),
+            LocalState {
+                actor_state: self
+                    .actor_state_extractors
+                    .get(&template.actor_performer_id)
+                    .unwrap()
+                    .extract(performer)
+                    .await,
+            },
+        );
+
+        ExecutionResult {
+            action_result,
+            local_states: updated_local_states,
+        }
     }
 }
 
@@ -116,11 +180,12 @@ mod tests {
             .once()
             .return_once(|_| ActionResult(None));
 
+        let actor_state_updated_clone = actor_state_updated.clone();
         actor_1_state_extractor
             .expect_extract()
             .withf(|actor| actor_having_value(actor, 10))
             .once()
-            .return_once(|_| actor_state_updated);
+            .return_once(|_| actor_state_updated_clone);
 
         let executor = SimpleActionTemplateExecutor {
             action_executor,
@@ -147,12 +212,15 @@ mod tests {
             )
             .await;
 
+        assert!(execution_result.action_result.0.is_none());
         assert_eq!(
-            execution_result,
-            ExecutionResult {
-                action_result: todo!(),
-                local_states
-            }
+            execution_result.local_states,
+            LocalStates(BTreeMap::from([(
+                ACTOR_1_ID.clone(),
+                LocalState {
+                    actor_state: actor_state_updated,
+                },
+            )]))
         );
     }
 
