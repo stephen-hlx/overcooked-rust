@@ -115,14 +115,16 @@ mod tests {
         );
     }
 
-    async fn proxy_for_intransitive_action(_: Arc<dyn ActorBase>) -> Result<(), Box<dyn Error>> {
+    async fn proxy_for_intransitive_action(
+        _: Arc<dyn ActorBase>,
+    ) -> Result<(), Box<dyn Error + Send>> {
         Ok(())
     }
 
     async fn proxy_for_transitive_action(
         _: Arc<dyn ActorBase>,
         _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error + Send>> {
         Ok(())
     }
 }

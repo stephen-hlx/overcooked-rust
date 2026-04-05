@@ -240,7 +240,9 @@ mod tests {
             == expected_value
     }
 
-    async fn proxy_for_intransitive_action(_: Arc<dyn ActorBase>) -> Result<(), Box<dyn Error>> {
+    async fn proxy_for_intransitive_action(
+        _: Arc<dyn ActorBase>,
+    ) -> Result<(), Box<dyn Error + Send>> {
         Ok(())
     }
 }

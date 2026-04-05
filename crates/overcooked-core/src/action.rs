@@ -10,7 +10,8 @@ mod action_template_executor;
 pub type IntransitiveAction = Box<
     dyn Fn(
             Arc<dyn ActorBase>,
-        ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>
+        )
+            -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error + Send>>> + Send + 'static>>
         + Send,
 >;
 
@@ -18,7 +19,8 @@ pub type TransitiveAction = Box<
     dyn Fn(
             Arc<dyn ActorBase>,
             Arc<dyn ActorBase>,
-        ) -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error>>> + Send + 'static>>
+        )
+            -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error + Send>>> + Send + 'static>>
         + Send,
 >;
 
@@ -42,7 +44,7 @@ trait ActionTemplateExecutor {
     -> ExecutionResult;
 }
 
-pub struct ActionResult(pub Option<Box<dyn Error>>);
+pub struct ActionResult(pub Option<Box<dyn Error + Send>>);
 
 pub struct ExecutionResult {
     pub action_result: ActionResult,
