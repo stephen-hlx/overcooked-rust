@@ -3,13 +3,13 @@ use std::{collections::HashMap, sync::Arc};
 use crate::{
     action::{
         ActionResult, ActionTemplate, ActionTemplateExecutor, ExecutionResult, IntransitiveAction,
-        TransitiveAction, action_template_executor::action_executor::SimpleActionExecutor,
+        TransitiveAction,
     },
     actor::{
         self, ActorBase, actor_factory::ActorFactory, actor_state_extractor::ActorStateExtractor,
         local_state::LocalState,
     },
-    global_state::LocalStates,
+    global_state::GlobalState,
 };
 
 use super::ActionType;
@@ -52,13 +52,13 @@ where
     async fn execute(
         &self,
         template: ActionTemplate,
-        local_states: LocalStates,
+        global_states: GlobalState,
     ) -> ExecutionResult {
         let performer = self
-            .restore_actor(&template.performer_id, &local_states)
+            .restore_actor(&template.performer_id, &global_states)
             .await;
 
-        let mut updated_local_states = local_states.clone();
+        let mut updated_global_states = global_states.clone();
         let action_result = match template.action_type {
             ActionType::Intransitive(action) => {
                 let action_result = self
@@ -75,7 +75,7 @@ where
                 receiver_id,
                 action,
             } => {
-                let receiver = self.restore_actor(&receiver_id, &local_states).await;
+                let receiver = self.restore_actor(&receiver_id, &global_states).await;
                 let action_result = self
                     .action_executor
                     .execute(Action::Transitive {
@@ -85,7 +85,7 @@ where
                     })
                     .await;
 
-                updated_local_states.0.insert(
+                updated_global_states.insert_local_state(
                     receiver_id.clone(),
                     self.extract_state(&receiver_id, receiver).await,
                 );
@@ -93,14 +93,14 @@ where
             }
         };
 
-        updated_local_states.0.insert(
+        updated_global_states.insert_local_state(
             template.performer_id.clone(),
             self.extract_state(&template.performer_id, performer).await,
         );
 
         ExecutionResult {
             action_result,
-            local_states: updated_local_states,
+            global_states: updated_global_states,
         }
     }
 }
@@ -112,12 +112,12 @@ where
     async fn restore_actor(
         &self,
         actor_id: &actor::Id,
-        local_states: &LocalStates,
+        global_state: &GlobalState,
     ) -> Arc<dyn ActorBase> {
         self.actor_factories
             .get(actor_id)
             .unwrap()
-            .restore_from_state(local_states.0.get(actor_id).unwrap().actor_state.clone())
+            .restore_from_state(global_state.get_local_state(actor_id).actor_state.clone())
             .await
     }
 
@@ -145,7 +145,7 @@ mod tests {
 
     use crate::{
         action::{
-            ActionResult, ActionTemplate, ActionTemplateExecutor, ActionType, ExecutionResult,
+            ActionResult, ActionTemplate, ActionTemplateExecutor, ActionType,
             action_template_executor::{Action, MockActionExecutor, SimpleActionTemplateExecutor},
         },
         actor::{
@@ -155,7 +155,7 @@ mod tests {
             actor_state_extractor::{ActorStateExtractor, MockActorStateExtractor},
             local_state::LocalState,
         },
-        global_state::LocalStates,
+        global_state::GlobalState,
         test_utils::test_actors::{TestActor1, TestActor1State, TestActor2, TestActor2State},
     };
 
@@ -167,7 +167,7 @@ mod tests {
         let actor: Arc<dyn ActorBase> = Arc::new(TestActor1::new(10));
         let actor_state_original: Arc<dyn ActorState> = Arc::new(TestActor1State { value: 10 });
         let actor_state_updated: Arc<dyn ActorState> = Arc::new(TestActor1State { value: 11 });
-        let local_states = LocalStates(BTreeMap::from([(
+        let global_state = GlobalState::new(BTreeMap::from([(
             ACTOR_1_ID.clone(),
             LocalState {
                 actor_state: actor_state_original.clone(),
@@ -222,14 +222,14 @@ mod tests {
                         Box::pin(proxy_for_intransitive_action(actor))
                     })),
                 },
-                local_states,
+                global_state,
             )
             .await;
 
         assert!(execution_result.action_result.0.is_none());
         assert_eq!(
-            execution_result.local_states,
-            LocalStates(BTreeMap::from([(
+            execution_result.global_states,
+            GlobalState::new(BTreeMap::from([(
                 ACTOR_1_ID.clone(),
                 LocalState {
                     actor_state: actor_state_updated,
@@ -246,7 +246,7 @@ mod tests {
         let actor_1_state_updated: Arc<dyn ActorState> = Arc::new(TestActor1State { value: 11 });
         let actor_2_state_original: Arc<dyn ActorState> = Arc::new(TestActor2State { value: 20 });
         let actor_2_state_updated: Arc<dyn ActorState> = Arc::new(TestActor2State { value: 21 });
-        let local_states = LocalStates(BTreeMap::from([
+        let global_state = GlobalState::new(BTreeMap::from([
             (
                 ACTOR_1_ID.clone(),
                 LocalState {
@@ -343,14 +343,14 @@ mod tests {
                         }),
                     },
                 },
-                local_states,
+                global_state,
             )
             .await;
 
         assert!(execution_result.action_result.0.is_none());
         assert_eq!(
-            execution_result.local_states,
-            LocalStates(BTreeMap::from([
+            execution_result.global_states,
+            GlobalState::new(BTreeMap::from([
                 (
                     ACTOR_1_ID.clone(),
                     LocalState {

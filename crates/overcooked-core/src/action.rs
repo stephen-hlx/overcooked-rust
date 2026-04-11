@@ -2,7 +2,7 @@ use std::{error::Error, pin::Pin, sync::Arc};
 
 use crate::{
     actor::{self, ActorBase},
-    global_state::LocalStates,
+    global_state::GlobalState,
 };
 
 mod action_template_executor;
@@ -40,7 +40,7 @@ pub struct ActionTemplate {
 
 #[async_trait::async_trait]
 trait ActionTemplateExecutor {
-    async fn execute(&self, template: ActionTemplate, local_states: LocalStates)
+    async fn execute(&self, template: ActionTemplate, global_state: GlobalState)
     -> ExecutionResult;
 }
 
@@ -48,5 +48,5 @@ pub struct ActionResult(pub Option<Box<dyn Error + Send>>);
 
 pub struct ExecutionResult {
     pub action_result: ActionResult,
-    pub local_states: LocalStates,
+    pub global_states: GlobalState,
 }

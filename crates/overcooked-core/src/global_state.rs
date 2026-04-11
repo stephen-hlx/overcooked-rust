@@ -5,20 +5,28 @@ use crate::actor::{self, local_state::LocalState};
 const SEED: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct LocalStates(pub BTreeMap<actor::Id, LocalState>);
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct GlobalState {
     id: u64,
-    local_states: LocalStates,
+    local_states: BTreeMap<actor::Id, LocalState>,
 }
 
 impl GlobalState {
-    pub fn new(local_states: &LocalStates) -> Self {
+    pub fn new(local_states: BTreeMap<actor::Id, LocalState>) -> Self {
         Self {
             id: SEED.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
-            local_states: local_states.clone(),
+            local_states: local_states,
         }
+    }
+
+    pub fn get_local_state(&self, actor_id: &actor::Id) -> LocalState {
+        self.local_states
+            .get(actor_id)
+            .expect(&format!("LocalState for {actor_id:?} not found"))
+            .clone()
+    }
+
+    pub fn insert_local_state(&mut self, actor_id: actor::Id, local_state: LocalState) {
+        self.local_states.insert(actor_id, local_state);
     }
 }
 
@@ -28,17 +36,25 @@ mod tests {
 
     use crate::{
         actor::{self, local_state::LocalState},
-        global_state::{GlobalState, LocalStates},
-        test_utils::test_actors::TestActor1State,
+        global_state::GlobalState,
+        test_utils::test_actors::{TestActor1State, TestActor2State},
     };
 
     #[test]
     fn can_be_constructed() {
-        let _ = GlobalState::new(&LocalStates(BTreeMap::from([(
-            actor::Id("some id".to_string()),
-            LocalState {
-                actor_state: Arc::new(TestActor1State { value: 1 }),
-            },
-        )])));
+        let _ = GlobalState::new(BTreeMap::from([
+            (
+                actor::Id("actor-1".to_string()),
+                LocalState {
+                    actor_state: Arc::new(TestActor1State { value: 1 }),
+                },
+            ),
+            (
+                actor::Id("actor-2".to_string()),
+                LocalState {
+                    actor_state: Arc::new(TestActor2State { value: 1 }),
+                },
+            ),
+        ]));
     }
 }
