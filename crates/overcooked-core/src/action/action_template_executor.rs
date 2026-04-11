@@ -13,6 +13,7 @@ use crate::{
 };
 
 use super::ActionType;
+pub(super) use action_executor::SimpleActionExecutor;
 
 mod action;
 mod action_executor;
@@ -39,9 +40,9 @@ pub(super) struct SimpleActionTemplateExecutor<AE>
 where
     AE: ActionExecutor,
 {
-    pub action_executor: AE,
-    pub actor_factories: HashMap<actor::Id, Box<dyn ActorFactory>>,
-    pub actor_state_extractors: HashMap<actor::Id, Box<dyn ActorStateExtractor>>,
+    pub(super) action_executor: AE,
+    pub(super) actor_factories: HashMap<actor::Id, Box<dyn ActorFactory>>,
+    pub(super) actor_state_extractors: HashMap<actor::Id, Box<dyn ActorStateExtractor>>,
 }
 
 #[async_trait::async_trait]

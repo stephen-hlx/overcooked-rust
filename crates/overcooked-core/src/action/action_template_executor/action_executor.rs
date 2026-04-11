@@ -1,6 +1,6 @@
 use super::{Action, ActionExecutor, ActionResult};
 
-pub(super) struct SimpleActionExecutor;
+pub struct SimpleActionExecutor;
 
 #[async_trait::async_trait]
 impl ActionExecutor for SimpleActionExecutor {

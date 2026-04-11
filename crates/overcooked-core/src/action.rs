@@ -1,7 +1,10 @@
-use std::{error::Error, pin::Pin, sync::Arc};
+use std::{collections::HashMap, error::Error, pin::Pin, sync::Arc};
 
 use crate::{
-    actor::{self, ActorBase},
+    action::action_template_executor::{SimpleActionExecutor, SimpleActionTemplateExecutor},
+    actor::{
+        self, ActorBase, actor_factory::ActorFactory, actor_state_extractor::ActorStateExtractor,
+    },
     global_state::GlobalState,
 };
 
@@ -26,6 +29,7 @@ pub type TransitiveAction = Arc<
         + Sync,
 >;
 
+#[derive(Clone)]
 pub enum ActionType {
     Intransitive(IntransitiveAction),
     Transitive {
@@ -34,23 +38,37 @@ pub enum ActionType {
     },
 }
 
+#[derive(Clone)]
 pub struct ActionTemplate {
     pub performer_id: actor::Id,
     pub label: &'static str,
     pub action_type: ActionType,
 }
 
+#[mockall::automock]
 #[async_trait::async_trait]
-trait ActionTemplateExecutor {
+pub trait ActionTemplateExecutor {
     async fn execute(&self, template: ActionTemplate, global_state: GlobalState)
     -> ExecutionResult;
 }
 
+#[derive(Debug)]
 pub struct ActionResult(pub Option<Box<dyn Error + Send>>);
 
 pub struct ExecutionResult {
     pub action_result: ActionResult,
     pub global_states: GlobalState,
+}
+
+pub fn create_executor(
+    actor_factories: HashMap<actor::Id, Box<dyn ActorFactory>>,
+    actor_state_extractors: HashMap<actor::Id, Box<dyn ActorStateExtractor>>,
+) -> Box<dyn ActionTemplateExecutor> {
+    Box::new(SimpleActionTemplateExecutor {
+        action_executor: SimpleActionExecutor,
+        actor_factories,
+        actor_state_extractors,
+    })
 }
 
 impl std::cmp::PartialEq for ActionTemplate {
