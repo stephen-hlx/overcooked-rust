@@ -4,7 +4,7 @@ use crate::actor::{self, local_state::LocalState};
 
 const SEED: AtomicU64 = AtomicU64::new(0);
 
-#[derive(Debug, Clone, Eq, Hash)]
+#[derive(Debug, Clone, Eq)]
 pub struct GlobalState {
     id: u64,
     local_states: BTreeMap<actor::Id, LocalState>,
@@ -36,50 +36,101 @@ impl PartialEq for GlobalState {
     }
 }
 
+impl std::hash::Hash for GlobalState {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.local_states.hash(state);
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use std::{collections::BTreeMap, sync::Arc};
+    use std::{
+        collections::BTreeMap,
+        hash::{DefaultHasher, Hasher},
+        sync::Arc,
+    };
 
     use crate::{
         actor::{self, local_state::LocalState},
         global_state::GlobalState,
-        test_utils::test_actors::{TestActor1State, TestActor2State},
+        test_utils::test_actors::TestActor1State,
     };
 
     #[test]
     fn can_be_constructed() {
-        let _ = GlobalState::new(create_local_states());
+        let _ = GlobalState::new(create_local_states(0));
     }
 
     #[test]
-    fn comparison_does_not_take_into_account_id() {
-        let local_states = create_local_states();
-        assert_eq!(
+    fn comparison_works() {
+        assert_ne!(
             GlobalState {
                 id: 1,
-                local_states: local_states.clone()
+                local_states: create_local_states(0)
             },
             GlobalState {
-                id: 2,
-                local_states
+                id: 1,
+                local_states: create_local_states(1)
             }
         )
     }
 
-    fn create_local_states() -> BTreeMap<actor::Id, LocalState> {
-        BTreeMap::from([
-            (
-                actor::Id("actor-1".to_string()),
-                LocalState {
-                    actor_state: Arc::new(TestActor1State { value: 1 }),
-                },
-            ),
-            (
-                actor::Id("actor-2".to_string()),
-                LocalState {
-                    actor_state: Arc::new(TestActor2State { value: 1 }),
-                },
-            ),
-        ])
+    #[test]
+    fn comparison_does_not_take_into_account_id() {
+        assert_eq!(
+            GlobalState {
+                id: 1,
+                local_states: create_local_states(0)
+            },
+            GlobalState {
+                id: 2,
+                local_states: create_local_states(0)
+            }
+        )
+    }
+
+    #[test]
+    fn hash_works() {
+        assert_ne!(
+            hash_it(&GlobalState {
+                id: 1,
+                local_states: create_local_states(0)
+            }),
+            hash_it(&GlobalState {
+                id: 1,
+                local_states: create_local_states(1)
+            })
+        );
+    }
+
+    #[test]
+    fn hash_does_not_take_into_account_id() {
+        assert_eq!(
+            hash_it(&GlobalState {
+                id: 1,
+                local_states: create_local_states(0)
+            }),
+            hash_it(&GlobalState {
+                id: 2,
+                local_states: create_local_states(0)
+            })
+        );
+    }
+
+    fn hash_it<T: std::hash::Hash>(value: &T) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        value.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    fn create_local_states(actor_1_state_value: u8) -> BTreeMap<actor::Id, LocalState> {
+        BTreeMap::from([(
+            actor::Id("actor-1".to_string()),
+            LocalState {
+                actor_state: Arc::new(TestActor1State {
+                    value: actor_1_state_value,
+                }),
+            },
+        )])
     }
 }
