@@ -4,7 +4,7 @@ use crate::actor::{self, local_state::LocalState};
 
 const SEED: AtomicU64 = AtomicU64::new(0);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Eq, Hash)]
 pub struct GlobalState {
     id: u64,
     local_states: BTreeMap<actor::Id, LocalState>,
@@ -30,6 +30,12 @@ impl GlobalState {
     }
 }
 
+impl PartialEq for GlobalState {
+    fn eq(&self, other: &Self) -> bool {
+        self.local_states == other.local_states
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{collections::BTreeMap, sync::Arc};
@@ -42,7 +48,26 @@ mod tests {
 
     #[test]
     fn can_be_constructed() {
-        let _ = GlobalState::new(BTreeMap::from([
+        let _ = GlobalState::new(create_local_states());
+    }
+
+    #[test]
+    fn comparison_does_not_take_into_account_id() {
+        let local_states = create_local_states();
+        assert_eq!(
+            GlobalState {
+                id: 1,
+                local_states: local_states.clone()
+            },
+            GlobalState {
+                id: 2,
+                local_states
+            }
+        )
+    }
+
+    fn create_local_states() -> BTreeMap<actor::Id, LocalState> {
+        BTreeMap::from([
             (
                 actor::Id("actor-1".to_string()),
                 LocalState {
@@ -55,6 +80,6 @@ mod tests {
                     actor_state: Arc::new(TestActor2State { value: 1 }),
                 },
             ),
-        ]));
+        ])
     }
 }
