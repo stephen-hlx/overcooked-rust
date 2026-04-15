@@ -39,7 +39,7 @@ mod tests {
         let test_actor_1 = Arc::new(TestActor1::new(0));
         let action = Action::Intransitive {
             performer: test_actor_1.clone(),
-            action: Box::new(|actor| Box::pin(proxy_for_intransitive_action(actor))),
+            action: Arc::new(|actor| Box::pin(proxy_for_intransitive_action(actor))),
         };
 
         assert!(executor.execute(action).await.0.is_none());
@@ -69,7 +69,7 @@ mod tests {
         let action = Action::Transitive {
             performer: test_actor_1.clone(),
             receiver: test_actor_2.clone(),
-            action: Box::new(|action_performer, action_receiver| {
+            action: Arc::new(|action_performer, action_receiver| {
                 Box::pin(proxy_for_transitive_action(
                     action_performer,
                     action_receiver,

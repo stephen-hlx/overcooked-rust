@@ -77,10 +77,10 @@ mod tests {
         assert_eq!(
             Action::Intransitive {
                 performer: Arc::new(actor_1),
-                action: Box::new(|actor| Box::pin(proxy_for_intransitive_action(actor)))
+                action: Arc::new(|actor| Box::pin(proxy_for_intransitive_action(actor)))
             } == Action::Intransitive {
                 performer: Arc::new(actor_2),
-                action: Box::new(|actor| Box::pin(proxy_for_intransitive_action(actor)))
+                action: Arc::new(|actor| Box::pin(proxy_for_intransitive_action(actor)))
             },
             expected
         );
@@ -101,13 +101,13 @@ mod tests {
             Action::Transitive {
                 performer: Arc::new(performer_1),
                 receiver: Arc::new(receiver_1),
-                action: Box::new(|performer, receiver| Box::pin(proxy_for_transitive_action(
+                action: Arc::new(|performer, receiver| Box::pin(proxy_for_transitive_action(
                     performer, receiver,
                 )))
             } == Action::Transitive {
                 performer: Arc::new(performer_2),
                 receiver: Arc::new(receiver_2),
-                action: Box::new(|performer, receiver| Box::pin(proxy_for_transitive_action(
+                action: Arc::new(|performer, receiver| Box::pin(proxy_for_transitive_action(
                     performer, receiver,
                 )))
             },

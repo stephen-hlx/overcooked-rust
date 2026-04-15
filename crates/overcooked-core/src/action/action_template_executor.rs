@@ -189,7 +189,7 @@ mod tests {
             .expect_execute()
             .with(eq(Action::Intransitive {
                 performer: actor,
-                action: Box::new(|actor| Box::pin(proxy_for_intransitive_action(actor))),
+                action: Arc::new(|actor| Box::pin(proxy_for_intransitive_action(actor))),
             }))
             .once()
             .return_once(|_| ActionResult(None));
@@ -218,7 +218,7 @@ mod tests {
                 ActionTemplate {
                     performer_id: ACTOR_1_ID.clone(),
                     label: "some_intransitive_action",
-                    action_type: ActionType::Intransitive(Box::new(|actor| {
+                    action_type: ActionType::Intransitive(Arc::new(|actor| {
                         Box::pin(proxy_for_intransitive_action(actor))
                     })),
                 },
@@ -286,7 +286,7 @@ mod tests {
             .with(eq(Action::Transitive {
                 performer: actor_1,
                 receiver: actor_2,
-                action: Box::new(|actor_1, actor_2| {
+                action: Arc::new(|actor_1, actor_2| {
                     Box::pin(proxy_for_transitive_action(actor_1, actor_2))
                 }),
             }))
@@ -338,7 +338,7 @@ mod tests {
                     label: "some_transitive_action",
                     action_type: ActionType::Transitive {
                         receiver_id: ACTOR_2_ID.clone(),
-                        action: Box::new(|actor_1, actor_2| {
+                        action: Arc::new(|actor_1, actor_2| {
                             Box::pin(proxy_for_transitive_action(actor_1, actor_2))
                         }),
                     },

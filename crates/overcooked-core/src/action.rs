@@ -7,21 +7,23 @@ use crate::{
 
 mod action_template_executor;
 
-pub type IntransitiveAction = Box<
+pub type IntransitiveAction = Arc<
     dyn Fn(
             Arc<dyn ActorBase>,
         )
             -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error + Send>>> + Send + 'static>>
-        + Send,
+        + Send
+        + Sync,
 >;
 
-pub type TransitiveAction = Box<
+pub type TransitiveAction = Arc<
     dyn Fn(
             Arc<dyn ActorBase>,
             Arc<dyn ActorBase>,
         )
             -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error + Send>>> + Send + 'static>>
-        + Send,
+        + Send
+        + Sync,
 >;
 
 pub enum ActionType {
@@ -117,7 +119,7 @@ mod tests {
         let _ = HashSet::from([(ActionTemplate {
             performer_id: actor::Id("actor".to_string()),
             label: "some_intransitive_action",
-            action_type: ActionType::Intransitive(Box::new(|actor| {
+            action_type: ActionType::Intransitive(Arc::new(|actor| {
                 Box::pin(proxy_for_intransitive_action(actor))
             })),
         })]);
@@ -210,7 +212,7 @@ mod tests {
     }
 
     fn intransitive_action_type() -> ActionType {
-        ActionType::Intransitive(Box::new(|actor| {
+        ActionType::Intransitive(Arc::new(|actor| {
             Box::pin(proxy_for_intransitive_action(actor))
         }))
     }
@@ -218,7 +220,7 @@ mod tests {
     fn transitive_action_type(receiver_id: actor::Id) -> ActionType {
         ActionType::Transitive {
             receiver_id,
-            action: Box::new(|performer, receiver| {
+            action: Arc::new(|performer, receiver| {
                 Box::pin(proxy_for_transitive_action(performer, receiver))
             }),
         }
