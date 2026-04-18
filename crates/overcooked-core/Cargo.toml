@@ -8,6 +8,7 @@ async-trait = { workspace = true }
 dyn-clone = { workspace = true }
 dyn-hash = { workspace = true }
 mockall = { workspace = true }
+paste = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 

@@ -9,6 +9,7 @@ use crate::{
 };
 
 mod action_template_executor;
+mod lambda_proxy;
 
 pub type IntransitiveAction = Arc<
     dyn Fn(

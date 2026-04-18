@@ -2,8 +2,9 @@ use std::sync::Arc;
 
 use crate::{
     actor::{ActorBase, actor_state::ActorState},
-    impl_actor_base, impl_actor_state,
+    impl_actor_base, impl_actor_state, intransitive_action,
     test_utils::data_store::DataStore,
+    transitive_action,
 };
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
@@ -31,6 +32,9 @@ impl_actor_base!(TestActor2);
 
 impl_actor_state!(TestActor1State);
 impl_actor_state!(TestActor2State);
+
+intransitive_action!(TestActor1, increase_inner_value_by_one);
+transitive_action!(TestActor1, decrease_test_actor_2_value_by_one, TestActor2);
 
 impl TestActor1 {
     pub fn new(value: u8) -> Self {
