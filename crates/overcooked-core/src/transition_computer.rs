@@ -9,12 +9,12 @@ use crate::{
     transition::Transition,
 };
 
-pub struct StateMachineDriver {
+pub struct TransitionComputer {
     actions: HashSet<ActionTemplate>,
     action_template_executor: Box<dyn ActionTemplateExecutor>,
 }
 
-impl StateMachineDriver {
+impl TransitionComputer {
     pub fn new(
         actions: HashSet<ActionTemplate>,
         actor_factories: HashMap<actor::Id, Box<dyn ActorFactory>>,
@@ -26,7 +26,7 @@ impl StateMachineDriver {
         }
     }
 
-    pub async fn compute_next(&self, from: GlobalState) -> HashSet<Transition> {
+    pub async fn compute(&self, from: GlobalState) -> HashSet<Transition> {
         let mut transitions = HashSet::new();
 
         for action_template in self.actions.iter() {
@@ -62,9 +62,9 @@ mod tests {
         },
         actor::{self, ActorBase, actor_state::ActorState, local_state::LocalState},
         global_state::GlobalState,
-        state_machine_driver::StateMachineDriver,
         test_utils::test_actors::{TestActor1State, TestActor2State},
         transition::Transition,
+        transition_computer::TransitionComputer,
     };
 
     static ACTOR_1_ID: LazyLock<actor::Id> = LazyLock::new(|| actor::Id("actor_1".to_string()));
@@ -90,15 +90,13 @@ mod tests {
             global_state_2.clone(),
         );
 
-        let state_machine_driver = StateMachineDriver {
+        let state_machine_driver = TransitionComputer {
             actions,
             action_template_executor: Box::new(executor),
         };
 
         assert_eq!(
-            state_machine_driver
-                .compute_next(global_state_0.clone())
-                .await,
+            state_machine_driver.compute(global_state_0.clone()).await,
             HashSet::from([
                 Transition {
                     from: global_state_0.clone(),
