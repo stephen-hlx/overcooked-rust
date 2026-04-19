@@ -64,7 +64,7 @@ pub struct ExecutionResult {
 pub fn create_executor(
     actor_factories: HashMap<actor::Id, Box<dyn ActorFactory>>,
     actor_state_extractors: HashMap<actor::Id, Box<dyn ActorStateExtractor>>,
-) -> Box<dyn ActionTemplateExecutor> {
+) -> Box<dyn ActionTemplateExecutor + Sync> {
     Box::new(SimpleActionTemplateExecutor {
         action_executor: SimpleActionExecutor,
         actor_factories,

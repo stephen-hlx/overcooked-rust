@@ -6,15 +6,16 @@ use crate::{
     actor::{self, actor_factory::ActorFactory, actor_state_extractor::ActorStateExtractor},
     create_executor,
     global_state::GlobalState,
+    state_machine_driver::TransitionComputer,
     transition::Transition,
 };
 
-pub struct TransitionComputer {
+pub struct SimpleTransitionComputer {
     actions: HashSet<ActionTemplate>,
-    action_template_executor: Box<dyn ActionTemplateExecutor>,
+    action_template_executor: Box<dyn ActionTemplateExecutor + Sync>,
 }
 
-impl TransitionComputer {
+impl SimpleTransitionComputer {
     pub fn new(
         actions: HashSet<ActionTemplate>,
         actor_factories: HashMap<actor::Id, Box<dyn ActorFactory>>,
@@ -25,8 +26,11 @@ impl TransitionComputer {
             action_template_executor: create_executor(actor_factories, actor_state_extractors),
         }
     }
+}
 
-    pub async fn compute(&self, from: GlobalState) -> HashSet<Transition> {
+#[async_trait::async_trait]
+impl TransitionComputer for SimpleTransitionComputer {
+    async fn compute(&self, from: GlobalState) -> HashSet<Transition> {
         let mut transitions = HashSet::new();
 
         for action_template in self.actions.iter() {
@@ -62,10 +66,12 @@ mod tests {
         },
         actor::{self, ActorBase, actor_state::ActorState, local_state::LocalState},
         global_state::GlobalState,
+        state_machine_driver::TransitionComputer,
         test_utils::test_actors::{TestActor1State, TestActor2State},
         transition::Transition,
-        transition_computer::TransitionComputer,
     };
+
+    use super::SimpleTransitionComputer;
 
     static ACTOR_1_ID: LazyLock<actor::Id> = LazyLock::new(|| actor::Id("actor_1".to_string()));
     static ACTOR_2_ID: LazyLock<actor::Id> = LazyLock::new(|| actor::Id("actor_2".to_string()));
@@ -90,7 +96,7 @@ mod tests {
             global_state_2.clone(),
         );
 
-        let state_machine_driver = TransitionComputer {
+        let state_machine_driver = SimpleTransitionComputer {
             actions,
             action_template_executor: Box::new(executor),
         };
