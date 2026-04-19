@@ -42,7 +42,7 @@ pub enum ActionType {
 #[derive(Clone)]
 pub struct ActionTemplate {
     pub performer_id: actor::Id,
-    pub label: &'static str,
+    pub label: String,
     pub action_type: ActionType,
 }
 
@@ -137,7 +137,7 @@ mod tests {
     fn action_template_can_be_added_to_a_set() {
         let _ = HashSet::from([(ActionTemplate {
             performer_id: actor::Id("actor".to_string()),
-            label: "some_intransitive_action",
+            label: SOME_INTRANSITIVE_ACTION.clone().to_string(),
             action_type: ActionType::Intransitive(Arc::new(|actor| {
                 Box::pin(proxy_for_intransitive_action(actor))
             })),
@@ -147,18 +147,41 @@ mod tests {
     static ACTOR_1_ID: LazyLock<actor::Id> = LazyLock::new(|| actor::Id("actor_1".to_string()));
     static ACTOR_2_ID: LazyLock<actor::Id> = LazyLock::new(|| actor::Id("actor_2".to_string()));
 
+    static SOME_INTRANSITIVE_ACTION: LazyLock<String> =
+        LazyLock::new(|| "some intransitive_action".to_string());
+    static SOME_OTHER_INTRANSITIVE_ACTION: LazyLock<String> =
+        LazyLock::new(|| "some other intransitive_action".to_string());
+    static SOME_TRANSITIVE_ACTION: LazyLock<String> =
+        LazyLock::new(|| "some transitive_action".to_string());
+    static SOME_OTHER_TRANSITIVE_ACTION: LazyLock<String> =
+        LazyLock::new(|| "some other transitive_action".to_string());
+
     #[test]
     fn action_template_eq_works() {
+        // diffferent action type
+        assert_ne!(
+            ActionTemplate {
+                performer_id: ACTOR_1_ID.clone(),
+                label: SOME_INTRANSITIVE_ACTION.clone(),
+                action_type: intransitive_action_type(),
+            },
+            ActionTemplate {
+                performer_id: ACTOR_1_ID.clone(),
+                label: SOME_TRANSITIVE_ACTION.clone(),
+                action_type: transitive_action_type(ACTOR_2_ID.clone()),
+            }
+        );
+
         // Intransitive
         assert_eq!(
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_intransitive_action",
+                label: SOME_INTRANSITIVE_ACTION.clone(),
                 action_type: intransitive_action_type(),
             },
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_intransitive_action",
+                label: SOME_INTRANSITIVE_ACTION.clone(),
                 action_type: intransitive_action_type(),
             }
         );
@@ -166,12 +189,12 @@ mod tests {
         assert_ne!(
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_intransitive_action",
+                label: SOME_INTRANSITIVE_ACTION.clone(),
                 action_type: intransitive_action_type(),
             },
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_other_intransitive_action",
+                label: SOME_OTHER_INTRANSITIVE_ACTION.clone(),
                 action_type: intransitive_action_type(),
             }
         );
@@ -179,12 +202,12 @@ mod tests {
         assert_ne!(
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_intransitive_action",
+                label: SOME_INTRANSITIVE_ACTION.clone(),
                 action_type: intransitive_action_type(),
             },
             ActionTemplate {
                 performer_id: ACTOR_2_ID.clone(),
-                label: "some_intransitive_action",
+                label: SOME_INTRANSITIVE_ACTION.clone(),
                 action_type: intransitive_action_type(),
             }
         );
@@ -193,12 +216,12 @@ mod tests {
         assert_eq!(
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_transitive_action",
+                label: SOME_TRANSITIVE_ACTION.clone(),
                 action_type: transitive_action_type(ACTOR_2_ID.clone()),
             },
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_transitive_action",
+                label: SOME_TRANSITIVE_ACTION.clone(),
                 action_type: transitive_action_type(ACTOR_2_ID.clone()),
             }
         );
@@ -206,12 +229,12 @@ mod tests {
         assert_ne!(
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_transitive_action",
+                label: SOME_TRANSITIVE_ACTION.clone(),
                 action_type: transitive_action_type(ACTOR_2_ID.clone()),
             },
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_other_transitive_action",
+                label: SOME_OTHER_TRANSITIVE_ACTION.clone(),
                 action_type: transitive_action_type(ACTOR_2_ID.clone()),
             }
         );
@@ -219,12 +242,12 @@ mod tests {
         assert_ne!(
             ActionTemplate {
                 performer_id: ACTOR_1_ID.clone(),
-                label: "some_transitive_action",
+                label: SOME_TRANSITIVE_ACTION.clone(),
                 action_type: transitive_action_type(ACTOR_2_ID.clone()),
             },
             ActionTemplate {
                 performer_id: ACTOR_2_ID.clone(),
-                label: "some_transitive_action",
+                label: SOME_TRANSITIVE_ACTION.clone(),
                 action_type: transitive_action_type(ACTOR_1_ID.clone()),
             }
         );

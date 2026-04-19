@@ -218,7 +218,7 @@ mod tests {
             .execute(
                 ActionTemplate {
                     performer_id: ACTOR_1_ID.clone(),
-                    label: "some_intransitive_action",
+                    label: "some_intransitive_action".to_string(),
                     action_type: ActionType::Intransitive(Arc::new(|actor| {
                         Box::pin(proxy_for_intransitive_action(actor))
                     })),
@@ -336,7 +336,7 @@ mod tests {
             .execute(
                 ActionTemplate {
                     performer_id: ACTOR_1_ID.clone(),
-                    label: "some_transitive_action",
+                    label: "some_transitive_action".to_string(),
                     action_type: ActionType::Transitive {
                         receiver_id: ACTOR_2_ID.clone(),
                         action: Arc::new(|actor_1, actor_2| {
