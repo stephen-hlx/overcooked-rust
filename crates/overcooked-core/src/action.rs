@@ -14,9 +14,9 @@ mod lambda_proxy;
 pub type IntransitiveAction = Arc<
     dyn Fn(
             Arc<dyn ActorBase>,
-        )
-            -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error + Send>>> + Send + 'static>>
-        + Send
+        ) -> Pin<
+            Box<dyn Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static>,
+        > + Send
         + Sync,
 >;
 
@@ -24,9 +24,9 @@ pub type TransitiveAction = Arc<
     dyn Fn(
             Arc<dyn ActorBase>,
             Arc<dyn ActorBase>,
-        )
-            -> Pin<Box<dyn Future<Output = Result<(), Box<dyn Error + Send>>> + Send + 'static>>
-        + Send
+        ) -> Pin<
+            Box<dyn Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static>,
+        > + Send
         + Sync,
 >;
 
@@ -53,8 +53,8 @@ pub trait ActionTemplateExecutor {
     -> ExecutionResult;
 }
 
-#[derive(Debug)]
-pub struct ActionResult(pub Option<Box<dyn Error + Send>>);
+#[derive(Debug, Clone)]
+pub struct ActionResult(pub Option<Arc<dyn Error + Send + Sync>>);
 
 pub struct ExecutionResult {
     pub action_result: ActionResult,
@@ -270,14 +270,14 @@ mod tests {
 
     async fn proxy_for_intransitive_action(
         _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send>> {
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
         Ok(())
     }
 
     async fn proxy_for_transitive_action(
         _: Arc<dyn ActorBase>,
         _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send>> {
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
         Ok(())
     }
 }

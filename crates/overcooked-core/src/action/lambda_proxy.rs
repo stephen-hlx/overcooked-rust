@@ -6,14 +6,14 @@ macro_rules! intransitive_action {
         paste::paste! {
             pub async fn [<$actor_type:snake _ $method>](
                 actor: ::std::sync::Arc<dyn crate::actor::ActorBase>,
-            ) -> Result<(), Box<dyn ::std::error::Error + Send>> {
+            ) -> Result<(), Box<dyn ::std::error::Error + Send + Sync>> {
                 Ok(crate::actor::ActorBase::as_any(actor.as_ref())
                     .downcast_ref::<$actor_type>()
                     .unwrap()
                     .$method()
                     .await
                     .map_err(|e| {
-                        let err: Box<dyn ::std::error::Error + Send> = Box::new(e);
+                        let err: Box<dyn ::std::error::Error + Send + Sync> = Box::new(e);
                         err
                     })?)
             }
@@ -28,7 +28,7 @@ macro_rules! transitive_action {
             pub async fn [<$action_performer_type:snake _ $method _ $action_receiver_type:snake>](
                 action_performer: ::std::sync::Arc<dyn crate::actor::ActorBase>,
                 action_receiver: ::std::sync::Arc<dyn crate::actor::ActorBase>,
-            ) -> Result<(), Box<dyn ::std::error::Error + Send>> {
+            ) -> Result<(), Box<dyn ::std::error::Error + Send + Sync>> {
                 Ok(crate::actor::ActorBase::as_any(action_performer.as_ref())
                     .downcast_ref::<$action_performer_type>()
                     .unwrap()
@@ -38,7 +38,7 @@ macro_rules! transitive_action {
                         .unwrap())
                     .await
                     .map_err(|e| {
-                        let err: Box<dyn ::std::error::Error + Send> = Box::new(e);
+                        let err: Box<dyn ::std::error::Error + Send + Sync> = Box::new(e);
                         err
                     })?)
             }

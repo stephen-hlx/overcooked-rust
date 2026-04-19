@@ -3,7 +3,7 @@ use crate::{
     global_state::GlobalState,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Transition {
     pub from: GlobalState,
     pub to: GlobalState,

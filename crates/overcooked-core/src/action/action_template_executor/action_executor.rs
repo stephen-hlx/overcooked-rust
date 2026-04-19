@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::{Action, ActionExecutor, ActionResult};
 
 pub struct SimpleActionExecutor;
@@ -15,7 +17,7 @@ impl ActionExecutor for SimpleActionExecutor {
         }
         .await
         {
-            ActionResult(Some(err))
+            ActionResult(Some(Arc::from(err)))
         } else {
             ActionResult(None)
         }
