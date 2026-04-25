@@ -10,7 +10,7 @@ pub trait ActorStateExtractor: Sync {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
+    use std::sync::{Arc, atomic::Ordering};
 
     use crate::{
         actor::{ActorBase, actor_state::ActorState, actor_state_extractor::ActorStateExtractor},
@@ -27,7 +27,7 @@ mod tests {
                     .downcast_ref::<TestActor1>()
                     .unwrap()
                     .value
-                    .get_value(),
+                    .load(Ordering::Relaxed),
             })
         }
     }
