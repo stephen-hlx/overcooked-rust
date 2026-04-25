@@ -2,9 +2,9 @@ mod action;
 pub mod actor;
 mod config;
 mod derives;
-mod execution_context;
 mod global_state;
 mod state_machine_driver;
+mod state_machine_execution_result;
 mod transition;
 
 pub(crate) use action::{ActionTemplateExecutor, create_executor};
