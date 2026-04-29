@@ -8,12 +8,12 @@ pub struct SimpleActionExecutor;
 impl ActionExecutor for SimpleActionExecutor {
     async fn execute(&self, action: Action) -> ActionResult {
         if let Err(err) = match action {
-            Action::Intransitive { performer, action } => action(performer),
+            Action::Intransitive { performer, action } => action.0(performer),
             Action::Transitive {
                 performer,
                 receiver,
                 action,
-            } => action(performer, receiver),
+            } => action.0(performer, receiver),
         }
         .await
         {
@@ -28,9 +28,12 @@ impl ActionExecutor for SimpleActionExecutor {
 mod tests {
     use std::sync::Arc;
 
-    use crate::test_utils::test_actors::{
-        TestActor1, TestActor2, test_actor1_decrease_test_actor_2_value_by_one_test_actor2,
-        test_actor1_increase_inner_value_by_one,
+    use crate::{
+        action::{IntransitiveAction, TransitiveAction},
+        test_utils::test_actors::{
+            TestActor1, TestActor2, test_actor1_decrease_test_actor_2_value_by_one_test_actor2,
+            test_actor1_increase_inner_value_by_one,
+        },
     };
 
     use super::*;
@@ -41,7 +44,7 @@ mod tests {
         let test_actor_1 = Arc::new(TestActor1::new(0));
         let action = Action::Intransitive {
             performer: test_actor_1.clone(),
-            action: Arc::new(|actor| Box::pin(test_actor1_increase_inner_value_by_one(actor))),
+            action: IntransitiveAction::of(test_actor1_increase_inner_value_by_one),
         };
 
         assert!(executor.execute(action).await.0.is_none());
@@ -57,12 +60,9 @@ mod tests {
         let action = Action::Transitive {
             performer: test_actor_1.clone(),
             receiver: test_actor_2.clone(),
-            action: Arc::new(|action_performer, action_receiver| {
-                Box::pin(test_actor1_decrease_test_actor_2_value_by_one_test_actor2(
-                    action_performer,
-                    action_receiver,
-                ))
-            }),
+            action: TransitiveAction::of(
+                test_actor1_decrease_test_actor_2_value_by_one_test_actor2,
+            ),
         };
 
         assert!(executor.execute(action).await.0.is_none());

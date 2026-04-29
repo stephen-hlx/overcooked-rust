@@ -54,7 +54,6 @@ impl TransitionComputer for SimpleTransitionComputer {
 mod tests {
     use std::{
         collections::{BTreeMap, HashSet},
-        error::Error,
         sync::{Arc, LazyLock},
     };
 
@@ -62,9 +61,10 @@ mod tests {
 
     use crate::{
         action::{
-            ActionResult, ActionTemplate, ActionType, ExecutionResult, MockActionTemplateExecutor,
+            ActionResult, ActionTemplate, ActionType, ExecutionResult, IntransitiveAction,
+            MockActionTemplateExecutor, TransitiveAction,
         },
-        actor::{self, ActorBase, actor_state::ActorState, local_state::LocalState},
+        actor::{self, actor_state::ActorState, local_state::LocalState},
         global_state::GlobalState,
         state_machine_driver::TransitionComputer,
         test_utils::test_actors::{TestActor1State, TestActor2State},
@@ -169,9 +169,7 @@ mod tests {
         ActionTemplate {
             performer_id: ACTOR_1_ID.clone(),
             label: "action-A".to_string(),
-            action_type: ActionType::Intransitive(Arc::new(|actor| {
-                Box::pin(proxy_for_intransitive_action(actor))
-            })),
+            action_type: ActionType::Intransitive(IntransitiveAction::dummy()),
         }
     }
 
@@ -181,23 +179,8 @@ mod tests {
             label: "action-B".to_string(),
             action_type: ActionType::Transitive {
                 receiver_id: ACTOR_2_ID.clone(),
-                action: Arc::new(|performer, receiver| {
-                    Box::pin(proxy_for_transitive_action(performer, receiver))
-                }),
+                action: TransitiveAction::dummy(),
             },
         }
-    }
-
-    async fn proxy_for_intransitive_action(
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
-    }
-
-    async fn proxy_for_transitive_action(
-        _: Arc<dyn ActorBase>,
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
     }
 }

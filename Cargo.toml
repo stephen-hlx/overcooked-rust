@@ -9,6 +9,7 @@ members = [
 async-trait = "0.1.89"
 dyn-clone = "1.0.20"
 dyn-hash = "0.2.2"
+futures = "0.3.32"
 lazy_static = "1.5.0"
 mockall = "0.14.0"
 paste = "1.0.15"

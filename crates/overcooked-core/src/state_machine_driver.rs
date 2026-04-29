@@ -81,15 +81,14 @@ impl StateMachineDriver {
 mod tests {
     use std::{
         collections::{BTreeMap, HashMap, HashSet},
-        error::Error,
         sync::{Arc, LazyLock},
     };
 
     use mockall::predicate::eq;
 
     use crate::{
-        action::{ActionResult, ActionTemplate, ActionType},
-        actor::{self, ActorBase, actor_state::ActorState, local_state::LocalState},
+        action::{ActionResult, ActionTemplate, ActionType, IntransitiveAction},
+        actor::{self, actor_state::ActorState, local_state::LocalState},
         global_state::GlobalState,
         state_machine_driver::{MockInvariantVerifier, MockTransitionComputer, StateMachineDriver},
         state_machine_execution_result::StateMachineExecutionResult,
@@ -303,16 +302,8 @@ mod tests {
         ActionTemplate {
             performer_id: ACTOR_ID.clone(),
             label: label.to_string(),
-            action_type: ActionType::Intransitive(Arc::new(|actor| {
-                Box::pin(proxy_for_intransitive_action(actor))
-            })),
+            action_type: ActionType::Intransitive(IntransitiveAction::dummy()),
         }
-    }
-
-    async fn proxy_for_intransitive_action(
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
     }
 
     #[derive(Debug, PartialEq, Eq, Hash, Clone, thiserror::Error)]

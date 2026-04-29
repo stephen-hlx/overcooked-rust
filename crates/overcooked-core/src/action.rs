@@ -1,4 +1,6 @@
-use std::{collections::HashMap, error::Error, pin::Pin, sync::Arc};
+use std::{collections::HashMap, error::Error, sync::Arc};
+
+use futures::future::BoxFuture;
 
 use crate::{
     action::action_template_executor::{SimpleActionExecutor, SimpleActionTemplateExecutor},
@@ -11,24 +13,58 @@ use crate::{
 mod action_template_executor;
 mod lambda_proxy;
 
-pub type IntransitiveAction = Arc<
-    dyn Fn(
-            Arc<dyn ActorBase>,
-        ) -> Pin<
-            Box<dyn Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static>,
-        > + Send
-        + Sync,
->;
+#[derive(Clone)]
+pub struct IntransitiveAction(
+    pub(crate)  Arc<
+        dyn Fn(Arc<dyn ActorBase>) -> BoxFuture<'static, Result<(), Box<dyn Error + Send + Sync>>>
+            + Send
+            + Sync,
+    >,
+);
 
-pub type TransitiveAction = Arc<
-    dyn Fn(
-            Arc<dyn ActorBase>,
-            Arc<dyn ActorBase>,
-        ) -> Pin<
-            Box<dyn Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static>,
-        > + Send
-        + Sync,
->;
+impl IntransitiveAction {
+    pub fn of<F, Fut>(f: F) -> Self
+    where
+        F: Fn(Arc<dyn ActorBase>) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static,
+    {
+        Self(Arc::new(move |actor| Box::pin(f(actor))))
+    }
+
+    #[cfg(test)]
+    pub fn dummy() -> Self {
+        Self::of(|_| async move { Ok(()) })
+    }
+}
+
+#[derive(Clone)]
+pub struct TransitiveAction(
+    pub(crate)  Arc<
+        dyn Fn(
+                Arc<dyn ActorBase>,
+                Arc<dyn ActorBase>,
+            ) -> BoxFuture<'static, Result<(), Box<dyn Error + Send + Sync>>>
+            + Send
+            + Sync,
+    >,
+);
+
+impl TransitiveAction {
+    pub fn of<F, Fut>(f: F) -> Self
+    where
+        F: Fn(Arc<dyn ActorBase>, Arc<dyn ActorBase>) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = Result<(), Box<dyn Error + Send + Sync>>> + Send + 'static,
+    {
+        Self(Arc::new(move |actor_1, actor_2| {
+            Box::pin(f(actor_1, actor_2))
+        }))
+    }
+
+    #[cfg(test)]
+    pub fn dummy() -> Self {
+        Self::of(|_, _| async move { Ok(()) })
+    }
+}
 
 #[derive(Clone)]
 pub enum ActionType {
@@ -120,27 +156,23 @@ impl std::fmt::Debug for ActionTemplate {
 
 #[cfg(test)]
 mod tests {
-    use std::{
-        collections::HashSet,
-        error::Error,
-        sync::{Arc, LazyLock},
-    };
+    use std::{collections::HashSet, sync::LazyLock};
 
     use crate::{
         action::ActionType,
-        actor::{self, ActorBase},
+        actor::{self},
     };
 
-    use super::ActionTemplate;
+    use super::*;
 
     #[test]
     fn action_template_can_be_added_to_a_set() {
         let _ = HashSet::from([(ActionTemplate {
             performer_id: actor::Id("actor".to_string()),
             label: SOME_INTRANSITIVE_ACTION.clone().to_string(),
-            action_type: ActionType::Intransitive(Arc::new(|actor| {
-                Box::pin(proxy_for_intransitive_action(actor))
-            })),
+            action_type: ActionType::Intransitive(IntransitiveAction::of(
+                |_| async move { Ok(()) },
+            )),
         })]);
     }
 
@@ -254,30 +286,13 @@ mod tests {
     }
 
     fn intransitive_action_type() -> ActionType {
-        ActionType::Intransitive(Arc::new(|actor| {
-            Box::pin(proxy_for_intransitive_action(actor))
-        }))
+        ActionType::Intransitive(IntransitiveAction::dummy())
     }
 
     fn transitive_action_type(receiver_id: actor::Id) -> ActionType {
         ActionType::Transitive {
             receiver_id,
-            action: Arc::new(|performer, receiver| {
-                Box::pin(proxy_for_transitive_action(performer, receiver))
-            }),
+            action: TransitiveAction::dummy(),
         }
-    }
-
-    async fn proxy_for_intransitive_action(
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
-    }
-
-    async fn proxy_for_transitive_action(
-        _: Arc<dyn ActorBase>,
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
     }
 }

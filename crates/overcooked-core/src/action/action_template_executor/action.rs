@@ -60,6 +60,7 @@ mod tests {
     use test_case::test_case;
 
     use crate::{
+        action::{IntransitiveAction, TransitiveAction},
         actor::ActorBase,
         test_utils::test_actors::{TestActor1, TestActor2},
     };
@@ -77,10 +78,10 @@ mod tests {
         assert_eq!(
             Action::Intransitive {
                 performer: Arc::new(actor_1),
-                action: Arc::new(|actor| Box::pin(proxy_for_intransitive_action(actor)))
+                action: IntransitiveAction::dummy()
             } == Action::Intransitive {
                 performer: Arc::new(actor_2),
-                action: Arc::new(|actor| Box::pin(proxy_for_intransitive_action(actor)))
+                action: IntransitiveAction::dummy()
             },
             expected
         );
@@ -101,30 +102,13 @@ mod tests {
             Action::Transitive {
                 performer: Arc::new(performer_1),
                 receiver: Arc::new(receiver_1),
-                action: Arc::new(|performer, receiver| Box::pin(proxy_for_transitive_action(
-                    performer, receiver,
-                )))
+                action: TransitiveAction::dummy(),
             } == Action::Transitive {
                 performer: Arc::new(performer_2),
                 receiver: Arc::new(receiver_2),
-                action: Arc::new(|performer, receiver| Box::pin(proxy_for_transitive_action(
-                    performer, receiver,
-                )))
+                action: TransitiveAction::dummy(),
             },
             expected
         );
-    }
-
-    async fn proxy_for_intransitive_action(
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
-    }
-
-    async fn proxy_for_transitive_action(
-        _: Arc<dyn ActorBase>,
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
     }
 }

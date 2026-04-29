@@ -138,7 +138,6 @@ where
 mod tests {
     use std::{
         collections::{BTreeMap, HashMap},
-        error::Error,
         sync::{Arc, LazyLock},
     };
 
@@ -146,7 +145,8 @@ mod tests {
 
     use crate::{
         action::{
-            ActionResult, ActionTemplate, ActionTemplateExecutor, ActionType,
+            ActionResult, ActionTemplate, ActionTemplateExecutor, ActionType, IntransitiveAction,
+            TransitiveAction,
             action_template_executor::{Action, MockActionExecutor, SimpleActionTemplateExecutor},
         },
         actor::{
@@ -190,7 +190,7 @@ mod tests {
             .expect_execute()
             .with(eq(Action::Intransitive {
                 performer: actor,
-                action: Arc::new(|actor| Box::pin(proxy_for_intransitive_action(actor))),
+                action: IntransitiveAction::dummy(),
             }))
             .once()
             .return_once(|_| ActionResult(None));
@@ -219,9 +219,7 @@ mod tests {
                 ActionTemplate {
                     performer_id: ACTOR_1_ID.clone(),
                     label: "some_intransitive_action".to_string(),
-                    action_type: ActionType::Intransitive(Arc::new(|actor| {
-                        Box::pin(proxy_for_intransitive_action(actor))
-                    })),
+                    action_type: ActionType::Intransitive(IntransitiveAction::dummy()),
                 },
                 global_state,
             )
@@ -287,9 +285,7 @@ mod tests {
             .with(eq(Action::Transitive {
                 performer: actor_1,
                 receiver: actor_2,
-                action: Arc::new(|actor_1, actor_2| {
-                    Box::pin(proxy_for_transitive_action(actor_1, actor_2))
-                }),
+                action: TransitiveAction::dummy(),
             }))
             .once()
             .return_once(|_| ActionResult(None));
@@ -339,9 +335,7 @@ mod tests {
                     label: "some_transitive_action".to_string(),
                     action_type: ActionType::Transitive {
                         receiver_id: ACTOR_2_ID.clone(),
-                        action: Arc::new(|actor_1, actor_2| {
-                            Box::pin(proxy_for_transitive_action(actor_1, actor_2))
-                        }),
+                        action: TransitiveAction::dummy(),
                     },
                 },
                 global_state,
@@ -398,18 +392,5 @@ mod tests {
             .unwrap()
             .get_value()
             == expected_value
-    }
-
-    async fn proxy_for_intransitive_action(
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
-    }
-
-    async fn proxy_for_transitive_action(
-        _: Arc<dyn ActorBase>,
-        _: Arc<dyn ActorBase>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        Ok(())
     }
 }
