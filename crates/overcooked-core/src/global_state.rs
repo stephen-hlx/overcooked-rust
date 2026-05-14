@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, sync::atomic::AtomicU64};
 
 use crate::actor::{self, local_state::LocalState};
 
-const SEED: AtomicU64 = AtomicU64::new(0);
+static SEED: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug, Clone, Eq)]
 pub struct GlobalState {
